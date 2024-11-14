@@ -1,0 +1,87 @@
+<!-- <%- include('./includes/header'); %> -->
+<%- include('menu'); %>
+<body class="users_body">
+    <script>
+        function homeClicked () {
+        window.location.href="/navbar";
+        }
+        function usersAdd () {
+            window.location.href="/users-add";
+        }
+        function srchTxt() {
+            var searchTxt = document.getElementById("searchFld").value.toLowerCase();
+               alert("Inside Search Text Function");
+            
+            fetch(`/searchLocations?searchTxt=${searchTxt}`)
+            .then(response => response.json())
+            .then(data => {
+                alert("Got the Data");
+            // Update the table with the fetched data
+            const tableBody = document.querySelector('.location_table tbody');
+            tableBody.innerHTML = ''; // Clear existing table rows
+
+            data.forEach(location => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                <td>${location.location_name}</td>
+                <td>${location.macid}</td>
+                <td>
+                    <button class="btnEdit">Edit</button>
+                    <button class="btnDelete">Delete</button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    })
+    .catch(error => console.error('Error searching locations:', error));
+    }
+        
+    </script>
+
+<!--  <%- include('./includes/profile'); %> -->
+<!--  <%- include('./includes/navbar'); %> -->
+  
+  <div class="users_form_container"> 
+      <h3>U s e r s</h3>
+      <hr width="100%" color="yellow" size="5">
+      <div class="users-form-top">
+        <div class="users-form-top-left">
+            <input type="text" onkeyup="srchTxt()" id="searchFld" name="searchFld" placeholder="Search for User" style="width: 310PX;">
+            <input type="text" onkeyup="srchTxt()" id="searchFld1" name="searchFld1" placeholder="Search for Location" style="width: 320PX;">
+            <button id="searchBtn" class="btnSearch"><i class="fa-solid fa-magnifying-glass" style="background-color: rgb(94, 203, 239)"></i>&nbsp Search</button>
+        </div>
+        <div class="location-form-top-right">
+            <button id="addBtn" class="btnAdd" onclick="usersAdd()"><i class="fa-solid fa-plus" style="background-color:rgb(94, 239, 94)"></i>&nbsp Add User</button>
+<!--            <button id="closeBtn" class="btnClose"><i class="fa-solid fa-circle-xmark" style="background-color:rgb(242, 32, 32)"></i>&nbsp Close</button> -->
+            <button class="btnHome" onClick="homeClicked()"> <img src="images/icons8-home-50.png">&nbspHome </button>
+        </div>  
+    </div>
+      <form class="users_form">
+        <div class="users_table_wrapper">
+            <table class="users_table">
+                <thead>
+                    <tr>
+                        <th width="30%">User Name</th>
+                        <th width="40%">Location</th>
+                        <th width="15%">User Type</th>
+                        <th width="15%">Actions</th>
+                    </tr>
+                </thead>
+                <tr>
+                    <% users.forEach(user => { %> 
+                        <td key="user.userid"><%= user.username %></td>
+                        <td><%= user.location_name %></td>
+                        <td><%= user.usertype %></td>
+                        <td><button id="editBtn" class="btnEdit" >Edit</button>
+                            <button id="deleteBtn" class="btnDelete" >Delete</button>
+                        </td>
+                </tr>
+                <% }); %>
+            </table>
+        </div>
+      </form>
+  </div>
+</body>
+
+</html>
+

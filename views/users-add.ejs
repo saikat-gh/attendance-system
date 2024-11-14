@@ -1,0 +1,50 @@
+<!-- <%- include('./includes/header'); %> -->
+<%- include('menu'); %>
+<body class="users-add-body">
+    <script>
+        function saveLocation () {
+            // event.preventDefault();
+            // console.log("here")
+            // window.location.href="/location/new";
+            // document.getElementsByClassName("form-location-add").reset
+        }
+    </script>
+<!--    <%- include('./includes/profile'); %> -->
+<!--    <%- include('./includes/navbar'); %> -->
+
+    <div class="users-add-form-container">
+        <h3>Add New User</h3>
+        <form class="users-location-add" method="post">
+            <table class="form-users-add-table">
+                <tr>
+                    <td><lable for ="location_name">Location Name</lable></td>
+                    <td><input type="text" id="location_name" name="location_name" required></td>
+                </tr>
+                <tr>
+                    <td><label for="address1">Address Line 1</label></td>
+                    <td><input type="text" id="address1" name="address1" required></td>
+                </tr>
+                <tr>
+                    <td><label for="address2">Address Line 2</label></td>
+                    <td><input type="text" id="address2" name="address2" required></td>
+                </tr>
+                <tr>
+                    <td><label for="address3">Address Line 3</label></td>
+                    <td><input type="text" id="address3" name="address3" required></td>
+                </tr>
+                <tr>
+                    <td><label for="macid">MAC ID:</label></td>
+                    <td><input type="text" id="macid" name="macid" required></td>
+                </tr>
+            </table>
+           
+            <div class="btnGroup">
+              <button class="btnSubmit" onClick="saveLocation()">Submit</button></a>
+              <button class="btnReset" type="reset">Reset Data</button>
+              <a href="/location"><button class="btnReturn" type="button">Return</button></a>
+            </div>
+        </form>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,87 @@
+<!-- <%- include('./includes/header'); %> -->
+<%- include('menu'); %>
+<body class="employee_body">
+    <script>
+        function homeClicked () {
+        window.location.href="/";
+        }
+        function employeeAdd () {
+            window.location.href="/employee-add";
+        }
+        function srchTxt() {
+            var searchTxt = document.getElementById("searchFld").value.toLowerCase();
+               alert("Inside Search Text Function");
+            
+            fetch(`/searchLocations?searchTxt=${searchTxt}`)
+            .then(response => response.json())
+            .then(data => {
+                alert("Got the Data");
+            // Update the table with the fetched data
+            const tableBody = document.querySelector('.location_table tbody');
+            tableBody.innerHTML = ''; // Clear existing table rows
+
+            data.forEach(location => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                <td>${location.location_name}</td>
+                <td>${location.macid}</td>
+                <td>
+                    <button class="btnEdit">Edit</button>
+                    <button class="btnDelete">Delete</button>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    })
+    .catch(error => console.error('Error searching locations:', error));
+    }
+        
+    </script>
+
+<!--  <%- include('./includes/profile'); %> -->
+<!--  <%- include('./includes/navbar'); %> -->
+  
+  <div class="employee_form_container"> 
+      <h3>E m p l o y e e s</h3>
+      <hr width="100%" color="yellow" size="5">
+      <div class="employee-form-top">
+        <div class="employee-form-top-left">
+            <input type="text" onkeyup="srchTxt()" id="searchFld" name="searchFld" placeholder="Search for Employee">
+            <button id="searchBtn" class="btnSearch"><i class="fa-solid fa-magnifying-glass" style="background-color: rgb(94, 203, 239)"></i>&nbsp Search</button>
+        </div>
+        <div class="employee-form-top-right">
+            <button id="addBtn" class="btnAdd" onclick="employeeAdd()"><i class="fa-solid fa-plus" style="background-color:rgb(94, 239, 94)"></i>&nbsp Add Employee</button>
+<!--            <button id="closeBtn" class="btnClose"><i class="fa-solid fa-circle-xmark" style="background-color:rgb(242, 32, 32)"></i>&nbsp Close</button> -->
+            <button class="btnHome" onClick="homeClicked()"> <img src="images/icons8-home-50.png">&nbspHome </button>
+        </div>  
+    </div>
+      <form class="employee_form">
+        <div class="employee_table_wrapper">
+            <table class="employee_table">
+                <thead>
+                    <tr>
+                        <th width="30%">First Name</th>
+                        <th width="30%">Last Name</th>                        
+                        <th width="25%">Picture</th>
+                        <th width="15%">Actions</th>
+                    </tr>
+                </thead>
+                <tr>
+                    <% employees.forEach(employee => { %>
+                    <td key="employee.id"><%= employee.fname %></td>
+                    <td><%= employee.lname %></td>                    
+                    <td><img src="<%= employee.fotourl %>" alt="" style="width: 30px; height: 30px; border-radius: 50%;"></td>
+
+                    <td><button id="editBtn" class="btnEdit" >Edit</button>
+                        <button id="deleteBtn" class="btnDelete" >Delete</button>
+                    </td>
+                </tr>
+                <% }); %>
+            </table>
+        </div>
+      </form>
+  </div>
+</body>
+
+</html>
+

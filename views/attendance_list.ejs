@@ -1,0 +1,74 @@
+<head>
+    <style>
+        .attendance-list-body {
+            background-color: rgb(240, 240, 112);
+            border: 1px solid brown;
+            max-width: 375px;
+            max-height: 640px;
+        }
+        h2 , h3, h4 {
+            text-align: center;
+        }
+        h2 {
+            margin-bottom: 3px;
+        }
+        h3 {
+            margin-top: 3px;
+            margin-bottom: 3px;
+        }
+        h4 {
+            margin-top: 3px;
+        }
+        .employee_attendance_table tr:hover td {
+            background-color: #bef7f7;
+        }
+        .employee_attendance_table tr {
+            height: 25px;
+        }
+    </style>
+</head>
+<body class = "attendance-list-body">
+    <div class="attendance-list-form-container">
+        <h2> Attendance Entry </h3>
+        <h3> Select Employee </h3>
+        <h4> Location :  <%= glbLocaName %> </h4>
+        <form class="employee_attendance_form">
+            <div class="employee__attendance_table_wrapper">
+                <table id="employee_attendance_table">
+                    <thead>
+                        <tr>
+                            <th width="100%">Employee Name</th>
+                        </tr>
+                    </thead>
+                    <tr>
+                        <% employees.forEach(employee => { %>
+                            <td data-key="employee.id"><%= employee.fname %>  <%= employee.lname %> </td>               
+                    </tr>
+                        <% }); %>
+                </table>
+            </div>
+        </form>        
+    </div>
+
+    <script>
+        // Select the table element
+        const table = document.getElementById('employee_attendance_table');
+
+        // Add click event listener to each row
+        table.addEventListener('click', function(event) {
+            // Ensure the event target is a table row
+            const row = event.target.closest('tr');
+            if (row && row.dataset.key) {
+                // Access the data-key attribute
+                const key = row.dataset.key;
+                console.log("Data-key:", key);
+
+                // Retrieve all cell data in the clicked row
+                const cells = Array.from(row.children).map(cell => cell.textContent);
+                console.log("Row Data:", cells);
+            }
+        });
+
+    </script>
+
+</body>

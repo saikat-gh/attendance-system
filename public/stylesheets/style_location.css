@@ -1,0 +1,259 @@
+.location_body {
+    background-color: #918f8f;
+}
+
+.location_form_container{
+    height: 100%vh;  /*550px;*/
+    width: 1100px;
+    background-color: rgb(74, 74, 74);  /*rgba(255,255,255,0.13);*/
+    position: absolute;
+    transform: translate(-50%,-50%);
+    top: 50%;
+    left: 50%;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.1);
+    box-shadow: 0 0 40px rgba(8,7,16,0.6);
+    padding: 10px 20px;
+}
+
+.location_form_container .location-icon-container {
+    color: red;
+    background: transparent;
+}
+
+.location_form_container  > h3 {
+    background-color: rgb(74, 74, 74);
+    text-align: center;
+    text-shadow: 0 3px rgb(17, 1, 1);
+    font-size: 2.0 rem;
+    font-weight: bold;
+    color: #dbf476;
+}
+
+/*.etched-text {
+    text-shadow: 0 2px white;
+    font-size: 2.0 rem;
+    font-weight: bold;
+    color: #042c5a;
+  }
+*/
+
+.location-form-top {
+    display:flex;
+    flex-direction: row;
+    background-color: rgb(74,74,74);
+}
+
+.location-form-top-left {
+    display: flex;
+    background-color: rgb(74,74,74);
+    width: 50%;
+    gap: 5px;
+ 
+}
+.location-form-top-right {
+    display: flex;
+    width: 50%;
+    background-color: rgb(74, 74, 74);
+    justify-content: flex-end;
+    align-items: flex-end;
+    gap: 5px;
+}
+
+.location_form_container .btnAdd {
+    background-color: rgb(94, 239, 94);
+    width: 150px;
+    border: none;
+    border-radius: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;   
+}
+
+.btnHome > img {
+    height: 25px;
+    background: transparent;
+}
+.location_form_container .btnHome {
+    background-color: rgb(218, 34, 68);
+    width: 150px;
+    border: none;
+    border-radius: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;   
+    color: black;
+    align-items: center;
+}
+
+.location_form_container .btnClose .fa-solid .fa-circle-xmark {
+    background-color: red;
+    color: red;
+}
+
+.location_form_container .btnSearch {
+    background-color: rgb(94, 203, 239);
+    width: 150px;
+    border: none;
+    border-radius: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;   
+}
+
+.location_form_container #searchFld {
+    background-color: beige;
+    width: 400px;
+    border: none;
+    padding-top: 3px;
+    padding-bottom: 3px;   
+}
+
+.location_table_wrapper {
+    height: 430px;
+    overflow-y: auto;
+    margin-top: 8px;
+}
+.location_table thead th {
+    position: sticky;
+    top: 0px;
+}
+
+.location_table {
+    width: 100%;
+    background-color: gray;
+}
+
+.location_table th {
+    background-color: burlywood;
+}
+
+.location_table tr {
+    border-bottom: 1px solid #ddd;
+  }
+
+.location_table tr:hover td {
+    background-color: #bef7f7;
+    .btnEdit {
+        background-color: #bef7f7;
+        color: black;
+    }
+    .btnDelete {
+        background-color: #bef7f7;
+        color: black;
+    }
+}
+
+.location_table td tr {
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+.btnEdit {
+    background-color: chocolate;
+    color: white;
+    width: 70px;
+    border: none;
+    border-radius: 4px;
+}
+.btnDelete {
+    background-color: red;
+    color: white;
+    width: 70px;
+    border: none;
+    border-radius: 4px;
+}
+
+/* Location Adding */
+
+.location-add-body {
+    background-color: #918f8f;
+}
+
+.location-add-form-container{
+    height: 350px;
+    width: 600px;
+    background-color: rgb(201, 236, 78);
+    position: absolute;
+    transform: translate(-50%,-50%);
+    top: 50%;
+    left: 50%;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.1);
+    box-shadow: 0 0 40px rgba(8,7,16,0.6);
+    padding: 20px 35px;
+}
+
+.location-add-form-container  > h3 {
+    background-color: rgb(74, 74, 74);
+    text-align: center;
+    text-shadow: 0 3px rgb(17, 1, 1);
+    font-size: 2.0 rem;
+    font-weight: bold;
+    color: #dbf476;
+    padding-bottom: 4px;
+}
+
+.form-location-add-table {
+    border-collapse: collapse;
+    background-color: rgb(201, 236, 78);
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border-spacing: 20px;
+    width: 100%;
+}
+
+.form-location-add-table td {
+    padding: 2px;
+}
+
+.form-location-add input {
+    width: 400px;
+}
+
+.form-location-add .btnSubmit {
+    background-color: rgb(53, 238, 53);
+    width: 150px;
+    border: none;
+    border-radius: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;   
+    color: black;
+}
+
+.form-location-add .btnSubmit:hover {
+    background-color: rgb(93, 241, 93);
+}
+
+.form-location-add .btnReset {
+    background-color: rgb(160, 131, 1);
+    width: 150px;
+    border: none;
+    border-radius: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;   
+    color: black;
+}
+
+.form-location-add .btnReset:hover {
+    background-color: rgb(159, 139, 50);
+}
+
+.form-location-add .btnReturn {
+    background-color: rgb(23, 182, 235);
+    width: 150px;
+    border: none;
+    border-radius: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;   
+    color: black;
+}
+
+.form-location-add .btnReturn:hover {
+    background-color: rgb(110, 203, 234);
+}
+
+.btnGroup {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+}

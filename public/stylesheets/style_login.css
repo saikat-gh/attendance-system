@@ -1,0 +1,99 @@
+/* style_login.css*/
+
+.login_form{
+	display: flex;
+	flex-direction: column;
+/*	align-items: center;*/
+    height: 500px;
+	width: 25%;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%,-50%);
+	border-radius: 15px;
+/*	backdrop-filter: blur(5px);*/
+	background: transparent;
+	border: 2px solid rgba(255,255,255,0.1);
+/*	box-shadow: 0 0 40px rgba(8,7,16,0.6);*/
+/*	box-shadow: inset -5px -5px  rgba(0,0,0,0.5);*/
+	box-shadow: 7px 7px 60px #000;
+	padding: 10px 30px;
+}
+
+.location-name {
+	font-weight: 700;
+	border: 2px solid rgb(5, 112, 158);
+	border-radius: 5px;
+	display: flex;
+	justify-content:flex-start;
+	
+	padding: 5px 0px 5px 0px;
+	backdrop-filter: blur(5px);
+}
+
+.close-icon {
+	position: absolute;
+	top: -10px;
+	right: 0;
+	font-size: 2em;
+	color: #f60202;
+}
+
+.user-logo {
+	display: flex;
+	justify-content: center;
+	margin-bottom: 20px;
+}
+.login_form  > h3{
+	font-family:Arial, Helvetica, sans-serif;
+    font-size: 2.5rem;
+    font-weight: 600;
+	font-stretch: expanded;
+    line-height: 20px;
+    text-align: center;
+	padding: 15px 15px;
+}
+
+/*.login_form > label {*/
+.labeltxt {
+    display: block;
+	padding-top: 15px;
+	font-family:Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+	color: black;
+	justify-content: flex-start;
+}
+
+.userselect {
+	padding: 10px 0px 10px 0px;
+	border-radius: 5px;
+}
+
+.login_form > input {
+	display: block;
+	width: 100%;
+	padding: 10px;
+	box-sizing: border-box;
+	border: 1px solid #ddd;
+	border-radius: 5px;
+}
+
+.login_form .btn_save {
+	padding: 15px;
+	border-radius: 10px;
+	margin-top: 40px;
+	margin-bottom: 15px;
+	border: none;
+	color: white;
+	cursor: pointer;
+	background-color: #05ae0b;
+	width: 100%;
+	font-size: 16px;
+}
+
+.login_form .btn_save :hover {
+	background-color: lightgreen;
+	transition: 0.2s;
+}
+
