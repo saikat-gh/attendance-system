@@ -43,18 +43,18 @@ var glbLocaName;
 var MacId
 var glbUserName;
 
-const networkInterfaces = os.networkInterfaces();
-for (let interface in networkInterfaces) {
-  MacId = networkInterfaces[interface][0].mac;
-  break;
-};
+// const networkInterfaces = os.networkInterfaces();
+// for (let interface in networkInterfaces) {
+//   MacId = networkInterfaces[interface][0].mac;
+//   break;
+// };
 
 /* GET Login/Home page. */
 router.get('/', async(req, res) => {
   const client = await pool.connect();
   try {
-    const locationResult = await client.query('SELECT id, location_name FROM location_master where LOWER(macid) = LOWER($1)', [MacId] );
-    const locations = locationResult.rows;
+   // const locationResult = await client.query('SELECT id, location_name FROM location_master where LOWER(macid) = LOWER($1)', [MacId] );
+   // const locations = locationResult.rows;
     glbLocaCode = 11  // locations[0].id;
     glbLocaName = "ISRO"  //locations[0].location_name;
 
