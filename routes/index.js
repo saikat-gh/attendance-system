@@ -55,8 +55,8 @@ router.get('/', async(req, res) => {
   try {
     const locationResult = await client.query('SELECT id, location_name FROM location_master where LOWER(macid) = LOWER($1)', [MacId] );
     const locations = locationResult.rows;
-    glbLocaCode = locations[0].id;
-    glbLocaName = locations[0].location_name;
+    glbLocaCode = 11  // locations[0].id;
+    glbLocaName = "ISRO"  //locations[0].location_name;
 
     const userResult = await client.query('SELECT * FROM user_master WHERE userlocation = $1', [glbLocaCode]);
     const users = userResult.rows;
