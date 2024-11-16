@@ -1,24 +1,14 @@
-<!-- <%- include('./includes/header'); %> -->
 <%- include('menu'); %>
-<body class="location-add-body">
-    <script>
-        function saveLocation () {
-            // event.preventDefault();
-            // console.log("here")
-            // window.location.href="/location/new";
-            // document.getElementsByClassName("form-location-add").reset
-        }
-    </script>
-<!--    <%- include('./includes/profile'); %> -->
-<!--    <%- include('./includes/navbar'); %> -->
 
-    <div class="location-add-form-container">
+<body class="location-edit-body">
+
+    <div class="location-edit-form-container">
         <h3>Add New Location</h3>
-        <form class="form-location-add" method="post">
-            <table class="form-location-add-table">
+        <form class="form-location-edit" method="post">
+            <table class="form-location-edit-table">
                 <tr>
                     <td><lable for ="location_name">Location Name</lable></td>
-                    <td><input type="text" id="location_name" name="location_name" required></td>
+                    <td><input type="text" id="location_name" name="location_name" value = <%= locations.location_name %> required></td>
                 </tr>
                 <tr>
                     <td><label for="address1">Address Line 1</label></td>

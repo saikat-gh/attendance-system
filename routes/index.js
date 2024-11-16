@@ -113,6 +113,16 @@ router.get('/attendance', async (req, res) => {
   }
 });
 
+router.get('/attendance-submit', (req, res) => {
+  const { key, cells } = req.query;
+  if (!key || !cells) {
+      return res.status(400).send("Invalid data provided.");
+  }
+
+  res.render('attendance-submit', { key, cells, glbLocaCode });
+});
+
+
 // Route to handle employee
 router.get('/employee', async (req, res) => {
   const client = await pool.connect();
@@ -183,6 +193,7 @@ router.get('/location', async (req, res) => {
   const client = await pool.connect();
   try {
     const result = await client.query('SELECT * FROM location_master order by location_name');
+    console.log(result.rows);
     const locations = result.rows;
     res.render('location_list', { locations, glbUserName, glbLocaName  });
   } catch (err) {
@@ -224,24 +235,55 @@ router.get('/searchLocations/:searchTxt', async (req, res) => {
   }
 });
 
+// Route to handle Location Add Form Display request
 router.get('/location-add', (req, res) => {
-  console.log("inside Route")
   res.render("location-add", { glbUserName, glbLocaName  });
 });
 
+// Route to handle Location Add request
 router.post('/location-add', async (req, res) => {
-  console.log("Route")
   const client = await pool.connect();
   try {
     console.log(req.body)
-    const { location_name, address1, address2, address3, macid } = req.body;
+    const { location_name, address1, address2, address3, abbr } = req.body;
       // Insert data into the database
-      const result = await client.query('INSERT INTO location_master (location_name, location_addr1, location_addr2, location_addr3, macid) VALUES ($1, $2, $3, $4, $5)', [location_name, address1, address2, address3, macid]);
+      const result = await client.query('INSERT INTO location_master (location_name, location_addr1, location_addr2, location_addr3, abbr) VALUES ($1, $2, $3, $4, $5)', [location_name, address1, address2, address3, abbr]);
       res.render("location-add", { glbUserName, glbLocaName  });
   } catch (error) {
       console.error('Error inserting data:', error);
       res.status(500).send('Internal Server Error');
   }
+});
+
+// Route to handle the Location Edit request
+router.get('/location-edit/:id', async(req, res) => {
+  const locationId = req.params.id;
+  // Fetch location details from the database based on locationId
+  const client = await pool.connect();
+  try {
+    const result = await client.query('SELECT * FROM location_master WHERE id = $1', [locationId]);
+    console.log(result.rows);
+    const locations = result.rows;
+    res.render('location-edit', { locations, glbUserName, glbLocaName  });
+  } catch (err) {
+    console.error('Error executing query', err);
+    res.status(500).send('Error fetching Locations');
+  } finally {
+    client.release();
+  }
+});
+
+// Route to handle the Location Delete request
+router.delete('/location-delete/:id', (req, res) => {
+  const locationId = req.params.id;
+  // Perform delete operation in the database
+  pool.query('DELETE FROM location_master WHERE id = $1', [locationId], (err, result) => {
+      if (err) {
+          console.error(err);
+          return res.status(500).send('Error deleting location.');
+      }
+      res.status(200).send('Location deleted successfully.');
+  });
 });
 
 router.get('/users-add', (req, res) => {

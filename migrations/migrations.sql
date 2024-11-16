@@ -16,15 +16,17 @@
 --	CONSTRAINT user_pk PRIMARY KEY (userid)
 --);
 
---CREATE TABLE public.location_master (
---	id serial4 NOT NULL,
---	location_name varchar NOT NULL,
---	location_addr1 varchar NULL,
---	location_addr2 varchar NULL,
---	location_addr3 varchar NULL,
---	macid varchar NOT NULL,
---	CONSTRAINT location_master_pk PRIMARY KEY (id)
---);
+-- CREATE TABLE public.location_master (
+-- 	id serial4 NOT NULL,
+-- 	location_name varchar NOT NULL,
+-- 	location_addr1 varchar NULL,
+-- 	location_addr2 varchar NULL,
+-- 	location_addr3 varchar NULL,
+-- 	macid varchar NULL,
+-- 	abbr varchar NULL,
+-- 	CONSTRAINT location_master_pk PRIMARY KEY (id),
+-- 	CONSTRAINT location_master_unique UNIQUE (abbr)
+-- );
 
 --CREATE TABLE public.employee_master (
 --	id serial4 NOT NULL,

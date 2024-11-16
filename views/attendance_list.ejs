@@ -72,7 +72,7 @@
                     // Retrieve all cell data in the clicked row
                     const cells = Array.from(row.children).map(cell => cell.textContent);
                     console.log("Row Data:", cells);
-                
+                    window.location.href = `/attendance-submit?key=${key}&cells=${cellsEncoded}`;
                 } else {
                     console.error("not row");
                 }

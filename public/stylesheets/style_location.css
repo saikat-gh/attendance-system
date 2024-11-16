@@ -162,7 +162,7 @@
     border-radius: 4px;
 }
 
-/* Location Adding */
+/* ........  Location Adding ....... */
 
 .location-add-body {
     background-color: #918f8f;
@@ -249,6 +249,291 @@
 }
 
 .form-location-add .btnReturn:hover {
+    background-color: rgb(110, 203, 234);
+}
+
+.btnGroup {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+}
+
+.location-add-body {
+    background-color: #918f8f;
+}
+
+.location-add-form-container{
+    height: 350px;
+    width: 600px;
+    background-color: rgb(201, 236, 78);
+    position: absolute;
+    transform: translate(-50%,-50%);
+    top: 50%;
+    left: 50%;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.1);
+    box-shadow: 0 0 40px rgba(8,7,16,0.6);
+    padding: 20px 35px;
+}
+
+.location-add-form-container  > h3 {
+    background-color: rgb(74, 74, 74);
+    text-align: center;
+    text-shadow: 0 3px rgb(17, 1, 1);
+    font-size: 2.0 rem;
+    font-weight: bold;
+    color: #dbf476;
+    padding-bottom: 4px;
+}
+
+.form-location-add-table {
+    border-collapse: collapse;
+    background-color: rgb(201, 236, 78);
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border-spacing: 20px;
+    width: 100%;
+}
+
+.form-location-add-table td {
+    padding: 2px;
+}
+
+.form-location-add input {
+    width: 400px;
+}
+
+.form-location-add .btnSubmit {
+    background-color: rgb(53, 238, 53);
+    width: 150px;
+    border: none;
+    border-radius: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;   
+    color: black;
+}
+
+.form-location-add .btnSubmit:hover {
+    background-color: rgb(93, 241, 93);
+}
+
+.form-location-add .btnReset {
+    background-color: rgb(160, 131, 1);
+    width: 150px;
+    border: none;
+    border-radius: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;   
+    color: black;
+}
+
+.form-location-add .btnReset:hover {
+    background-color: rgb(159, 139, 50);
+}
+
+.form-location-add .btnReturn {
+    background-color: rgb(23, 182, 235);
+    width: 150px;
+    border: none;
+    border-radius: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;   
+    color: black;
+}
+
+.form-location-add .btnReturn:hover {
+    background-color: rgb(110, 203, 234);
+}
+
+.btnGroup {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+}
+
+
+/* ........ Location Edit ....... */
+
+.location-edit-body {
+    background-color: #918f8f;
+}
+
+.location-edit-form-container{
+    height: 350px;
+    width: 600px;
+    background-color: rgb(201, 236, 78);
+    position: absolute;
+    transform: translate(-50%,-50%);
+    top: 50%;
+    left: 50%;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.1);
+    box-shadow: 0 0 40px rgba(8,7,16,0.6);
+    padding: 20px 35px;
+}
+
+.location-edit-form-container  > h3 {
+    background-color: rgb(74, 74, 74);
+    text-align: center;
+    text-shadow: 0 3px rgb(17, 1, 1);
+    font-size: 2.0 rem;
+    font-weight: bold;
+    color: #dbf476;
+    padding-bottom: 4px;
+}
+
+.form-location-edit-table {
+    border-collapse: collapse;
+    background-color: rgb(201, 236, 78);
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border-spacing: 20px;
+    width: 100%;
+}
+
+.form-location-edit-table td {
+    padding: 2px;
+}
+
+.form-location-edit input {
+    width: 400px;
+}
+
+.form-location-edit .btnSubmit {
+    background-color: rgb(53, 238, 53);
+    width: 150px;
+    border: none;
+    border-radius: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;   
+    color: black;
+}
+
+.form-location-edit .btnSubmit:hover {
+    background-color: rgb(93, 241, 93);
+}
+
+.form-location-edit .btnReset {
+    background-color: rgb(160, 131, 1);
+    width: 150px;
+    border: none;
+    border-radius: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;   
+    color: black;
+}
+
+.form-location-edit .btnReset:hover {
+    background-color: rgb(159, 139, 50);
+}
+
+.form-location-edit .btnReturn {
+    background-color: rgb(23, 182, 235);
+    width: 150px;
+    border: none;
+    border-radius: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;   
+    color: black;
+}
+
+.form-location-edit .btnReturn:hover {
+    background-color: rgb(110, 203, 234);
+}
+
+.btnGroup {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+}
+
+.location-edit-body {
+    background-color: #918f8f;
+}
+
+.location-edit-form-container{
+    height: 350px;
+    width: 600px;
+    background-color: rgb(201, 236, 78);
+    position: absolute;
+    transform: translate(-50%,-50%);
+    top: 50%;
+    left: 50%;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.1);
+    box-shadow: 0 0 40px rgba(8,7,16,0.6);
+    padding: 20px 35px;
+}
+
+.location-edit-form-container  > h3 {
+    background-color: rgb(74, 74, 74);
+    text-align: center;
+    text-shadow: 0 3px rgb(17, 1, 1);
+    font-size: 2.0 rem;
+    font-weight: bold;
+    color: #dbf476;
+    padding-bottom: 4px;
+}
+
+.form-location-edit-table {
+    border-collapse: collapse;
+    background-color: rgb(201, 236, 78);
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border-spacing: 20px;
+    width: 100%;
+}
+
+.form-location-edit-table td {
+    padding: 2px;
+}
+
+.form-location-edit input {
+    width: 400px;
+}
+
+.form-location-edit .btnSubmit {
+    background-color: rgb(53, 238, 53);
+    width: 150px;
+    border: none;
+    border-radius: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;   
+    color: black;
+}
+
+.form-location-edit .btnSubmit:hover {
+    background-color: rgb(93, 241, 93);
+}
+
+.form-location-edit .btnReset {
+    background-color: rgb(160, 131, 1);
+    width: 150px;
+    border: none;
+    border-radius: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;   
+    color: black;
+}
+
+.form-location-edit .btnReset:hover {
+    background-color: rgb(159, 139, 50);
+}
+
+.form-location-edit .btnReturn {
+    background-color: rgb(23, 182, 235);
+    width: 150px;
+    border: none;
+    border-radius: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;   
+    color: black;
+}
+
+.form-location-edit .btnReturn:hover {
     background-color: rgb(110, 203, 234);
 }
 
