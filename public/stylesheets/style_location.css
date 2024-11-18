@@ -147,6 +147,17 @@
     padding-right: 3px;
 }
 
+.editTag {
+    background-color: #e08312;
+  color: white;
+  padding: 1px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  border: 2 px solid black;
+  border-radius: 4px;
+}
+
 .btnEdit {
     background-color: chocolate;
     color: white;

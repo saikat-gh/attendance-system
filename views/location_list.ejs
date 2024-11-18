@@ -65,9 +65,12 @@
                     <tr data-key= <%= location.id %> >
                         <td> <%= location.location_name %> </td>
                         <td> <%= location.abbr %> </td>
-                        <td><button id="editBtn" class="btnEdit" >Edit</button>
+                        <td><a class="editTag" href="/location-edit?id=<%= location.id %>">Edit</a>
                             <button id="deleteBtn" class="btnDelete" >Delete</button>
                         </td>
+                        <!-- <td><button id="editBtn" class="btnEdit" >Edit</button>
+                            <button id="deleteBtn" class="btnDelete" >Delete</button>
+                        </td> -->
     
                     </tr>
                 <% }); %>
@@ -106,8 +109,8 @@
     function handleEdit(locationId, row) {
         console.log(`Edit clicked for Location ID: ${locationId}`);
         // Redirect to an edit page with the location ID
-        alert(`/location-edit/${locationId}`);
-        window.location.href = `/location-edit/${locationId}`;
+//        alert(`/location-edit/${locationId}`);
+        window.location.href = `/location-edit?id=${locationId}`
     }
 
     // Function to handle Delete button click

@@ -98,7 +98,7 @@ router.post('/employee-add', upload.single('image'), async(req, res) => {
   });
 });
 
-// Route to handle Attendance Entry
+// Route to handle Attendance Entry Employee Selection
 router.get('/attendance', async (req, res) => {
   const client = await pool.connect();
   try {
@@ -112,6 +112,26 @@ router.get('/attendance', async (req, res) => {
     client.release();
   }
 });
+
+// Route to handle Attendance Entry
+router.get('/attendance-submit/:key', async(req, res) => {
+  const locationId = req.params.id;
+  console.log(`From Backend Route - Editing location ${locationId}`);
+  // Fetch location details from the database based on locationId
+  const client = await pool.connect();
+  try {
+    const result = await client.query('SELECT * FROM location_master WHERE id = $1', [locationId]);
+    console.log(result.rows);
+    const locations = result.rows;
+    res.render('location-edit', { locations, glbUserName, glbLocaName  });
+  } catch (err) {
+    console.error('Error executing query', err);
+    res.status(500).send('Error fetching Locations');
+  } finally {
+    client.release();
+  }
+});
+
 
 router.get('/attendance-submit', (req, res) => {
   const { key, cells } = req.query;
@@ -193,7 +213,7 @@ router.get('/location', async (req, res) => {
   const client = await pool.connect();
   try {
     const result = await client.query('SELECT * FROM location_master order by location_name');
-    console.log(result.rows);
+//    console.log(result.rows);
     const locations = result.rows;
     res.render('location_list', { locations, glbUserName, glbLocaName  });
   } catch (err) {
@@ -256,8 +276,9 @@ router.post('/location-add', async (req, res) => {
 });
 
 // Route to handle the Location Edit request
-router.get('/location-edit/:id', async(req, res) => {
-  const locationId = req.params.id;
+router.get('/location-edit', async(req, res) => {
+  const locationId = req.query.id;
+  console.log(`From Backend Route - Editing location ${locationId}`);
   // Fetch location details from the database based on locationId
   const client = await pool.connect();
   try {

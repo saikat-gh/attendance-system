@@ -3,28 +3,29 @@
 <body class="location-edit-body">
 
     <div class="location-edit-form-container">
-        <h3>Add New Location</h3>
+        <h3>Edit/Update Location</h3>
+        
         <form class="form-location-edit" method="post">
             <table class="form-location-edit-table">
                 <tr>
                     <td><lable for ="location_name">Location Name</lable></td>
-                    <td><input type="text" id="location_name" name="location_name" value = <%= locations.location_name %> required></td>
+                    <td><input type="text" id="location_name" name="location_name" value = "<%= locations[0].location_name %>" required></td>
                 </tr>
                 <tr>
                     <td><label for="address1">Address Line 1</label></td>
-                    <td><input type="text" id="address1" name="address1" required></td>
+                    <td><input type="text" id="address1" name="address1" value = "<%= locations[0].location_addr1 %>" required></td>
                 </tr>
                 <tr>
                     <td><label for="address2">Address Line 2</label></td>
-                    <td><input type="text" id="address2" name="address2" required></td>
+                    <td><input type="text" id="address2" name="address2" value = "<%= locations[0].location_addr2 %>" required></td>
                 </tr>
                 <tr>
                     <td><label for="address3">Address Line 3</label></td>
-                    <td><input type="text" id="address3" name="address3" required></td>
+                    <td><input type="text" id="address3" name="address3" value = "<%= locations[0].location_addr3 %>" required></td>
                 </tr>
                 <tr>
                     <td><label for="abbr">Abbreviation</label></td>
-                    <td><input type="text" id="abbr" name="abbr" maxlength="10"></td>
+                    <td><input type="text" id="abbr" name="abbr" maxlength="10" value = "<%= locations[0].abbr %>" ></td>
                 </tr>
             </table>
            
