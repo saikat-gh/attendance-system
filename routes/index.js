@@ -294,22 +294,41 @@ router.get('/location-edit', async(req, res) => {
   }
 });
 
-// Route to handle Location Add request
-router.put('/location-update', async (req, res) => {
+// Route to handle the Location Update request
+router.put('/location-update', (req, res) => {
   const locationId = req.query.id;
-  const { name, addr1, addr2, addr3, abbr } = req.body;
-  const client = await pool.connect();
-  // Update data into the database
-  const sql = "Update location_master set location_name = $1, location_addr1 = $2, location_addr2 = $3, location_addr3=$4, abbr=$5 Where Id = locationId";
-  pool.query(sql, [locationId, name, addr1, addr2, addr3, abbr], (err, result) => {
+  if (!locationId) {
+    return res.status(400).send('Location ID is required.');
+  }
+  const { location_name, address1, address2, address3, abbr } = req.body;
+  if (!location_name || !address1 || !address2 || !address3) {
+    return res.status(400).send('All address fields and name are required.');
+  }
+  console.log("Inside Location update Route");
+  console.log(req.body);
+  const sql = `
+    UPDATE location_master 
+    SET 
+      location_name = $1, 
+      location_addr1 = $2, 
+      location_addr2 = $3, 
+      location_addr3 = $4, 
+      abbr = $5 
+    WHERE id = $6
+  `;
+  console.log(sql);
+  pool.query(sql, [location_name, address1, address2, address3, abbr, locationId], (err, result) => {
     if (err) {
-        console.error(err);
-        return res.status(500).send('Error updating location.');
+      console.error('Database error:', err);
+      return res.status(500).send('Error updating location.');
+    }
+    if (result.rowCount === 0) {
+      return res.status(404).send('Location not found.');
     }
     res.status(200).send('Location updated successfully.');
+  });
 });
 
- });
 // Route to handle the Location Delete request
 router.delete('/location-delete', (req, res) => {
   const locationId = req.query.id;

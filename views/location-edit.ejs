@@ -1,25 +1,11 @@
 <%- include('menu'); %>
 
 <body class="location-edit-body">
-    <script>
-        function updateLocation(locationId) {
-            fetch(`/location-update?id=${locationId}`, {
-                method: 'PUT',
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to Update location details');
-                }
-                return response.text();
-            })
-            .catch(error => console.error('Error updating location:', error));
-            }
-    </script>
 
     <div class="location-edit-form-container">
         <h3>Edit/Update Location</h3>
-        
-        <form class="form-location-edit" method="put">
+
+        <form class="form-location-edit" onsubmit="event.preventDefault()" >
             <table class="form-location-edit-table">
                 <tr>
                     <td><lable for ="location_name">Location Name</lable></td>
@@ -44,12 +30,47 @@
             </table>
            
             <div class="btnGroup">
-              <button class="btnSubmit" onClick="updateLocation(<%= locations[0].id %>)">Submit</button></a>
+              <button class="btnSubmit" type="button" onClick="updateLocation(<%= locations[0].id %>)">Submit</button>
               <button class="btnReset" type="reset">Reset Data</button>
               <a href="/location"><button class="btnReturn" type="button">Return</button></a>
             </div>
         </form>
     </div>
+
+    <script>
+        function updateLocation(locationId) {
+            console.log("inside update function");
+            // Collect form data
+            const data = {
+                            location_name: document.getElementById('location_name').value,
+                            address1: document.getElementById('address1').value,
+                            address2: document.getElementById('address2').value,
+                            address3: document.getElementById('address3').value,
+                            abbr: document.getElementById('abbr').value,
+                        };
+
+            // Send the data via fetch
+            fetch(`/location-update?id=${locationId}`, {
+                method: 'PUT',
+                headers: {
+                            'Content-Type': 'application/json',
+                            },
+                body: JSON.stringify(data),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to update location details');
+                }
+                return response.text();
+            })
+            .then(message => {
+                console.log(message);
+                // Redirect on success
+                window.location.href = "/location";
+            })
+            .catch(error => console.error('Error updating location:', error));
+        }    
+    </script>
+
 </body>
 
-</html>
