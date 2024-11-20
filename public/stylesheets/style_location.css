@@ -149,13 +149,13 @@
 
 .editTag {
     background-color: #e08312;
-  color: white;
-  padding: 1px 20px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  border: 2 px solid black;
-  border-radius: 4px;
+    color: white;
+    padding: 1px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    border: 2 px solid black;
+    border-radius: 4px;
 }
 
 .btnEdit {
@@ -165,6 +165,18 @@
     border: none;
     border-radius: 4px;
 }
+
+.deleteTag {
+    background-color: red;
+    color: white;
+    padding: 1px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    border: 2 px solid black;
+    border-radius: 4px;
+}
+
 .btnDelete {
     background-color: red;
     color: white;

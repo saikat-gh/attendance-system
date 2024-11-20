@@ -1,11 +1,25 @@
 <%- include('menu'); %>
 
 <body class="location-edit-body">
+    <script>
+        function updateLocation(locationId) {
+            fetch(`/location-update?id=${locationId}`, {
+                method: 'PUT',
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to Update location details');
+                }
+                return response.text();
+            })
+            .catch(error => console.error('Error updating location:', error));
+            }
+    </script>
 
     <div class="location-edit-form-container">
         <h3>Edit/Update Location</h3>
         
-        <form class="form-location-edit" method="post">
+        <form class="form-location-edit" method="put">
             <table class="form-location-edit-table">
                 <tr>
                     <td><lable for ="location_name">Location Name</lable></td>
@@ -30,7 +44,7 @@
             </table>
            
             <div class="btnGroup">
-              <button class="btnSubmit" onClick="saveLocation()">Submit</button></a>
+              <button class="btnSubmit" onClick="updateLocation(<%= locations[0].id %>)">Submit</button></a>
               <button class="btnReset" type="reset">Reset Data</button>
               <a href="/location"><button class="btnReturn" type="button">Return</button></a>
             </div>

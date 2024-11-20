@@ -294,9 +294,26 @@ router.get('/location-edit', async(req, res) => {
   }
 });
 
+// Route to handle Location Add request
+router.put('/location-update', async (req, res) => {
+  const locationId = req.query.id;
+  const { name, addr1, addr2, addr3, abbr } = req.body;
+  const client = await pool.connect();
+  // Update data into the database
+  const sql = "Update location_master set location_name = $1, location_addr1 = $2, location_addr2 = $3, location_addr3=$4, abbr=$5 Where Id = locationId";
+  pool.query(sql, [locationId, name, addr1, addr2, addr3, abbr], (err, result) => {
+    if (err) {
+        console.error(err);
+        return res.status(500).send('Error updating location.');
+    }
+    res.status(200).send('Location updated successfully.');
+});
+
+ });
 // Route to handle the Location Delete request
-router.delete('/location-delete/:id', (req, res) => {
-  const locationId = req.params.id;
+router.delete('/location-delete', (req, res) => {
+  const locationId = req.query.id;
+  console.log("Inside Delete Route");
   // Perform delete operation in the database
   pool.query('DELETE FROM location_master WHERE id = $1', [locationId], (err, result) => {
       if (err) {
