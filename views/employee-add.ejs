@@ -5,7 +5,17 @@
         <form autocomplete="off" class="emp-add-form" method="POST" action="/employee-add" enctype="multipart/form-data">
             <div class="emp-add-input">
                 <div class="emp-entry-fields">
-                    <table class="emp-add-table">
+                    <table style="width:100%" class="emp-add-table">
+                        <tr>
+                            <td><label for = "location">Location</label></td>
+                            <td>
+                                <select class="userselect" id="location_name" name="location_name" required>
+                                    <% locations.forEach(function(location) { %>
+                                      <option value="<%= location.location_name %>"><%= location.location_name %></option>
+                                    <% }); %>
+                                </select>                      
+                            </td>
+                        </tr>
                         <tr>
                             <td><lable for ="fname">First Name</lable></td>
                             <td><input type="text" id="fname" name="fname" placeholder="Enter your First Name" required></td>
@@ -143,7 +153,7 @@
             tracks.forEach(track => track.stop());
 
             // Hide the video and show the image box
-            video.style.display = 'none';
+            // video.style.display = 'none';
         }, 'image/png'); // Specify the format as PNG
     });
 

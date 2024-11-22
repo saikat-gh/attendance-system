@@ -40,8 +40,9 @@ function myFunction() {
 const os = require('os');
 var glbLocaCode;
 var glbLocaName;
-var MacId
+//var MacId
 var glbUserName;
+var glbUserType;
 
 // const networkInterfaces = os.networkInterfaces();
 // for (let interface in networkInterfaces) {
@@ -55,13 +56,13 @@ router.get('/', async(req, res) => {
   try {
    // const locationResult = await client.query('SELECT id, location_name FROM location_master where LOWER(macid) = LOWER($1)', [MacId] );
    // const locations = locationResult.rows;
-    glbLocaCode = 11  // locations[0].id;
-    glbLocaName = "ISRO"  //locations[0].location_name;
+   // glbLocaCode = 11  // locations[0].id;
+   // glbLocaName = "ISRO"  //locations[0].location_name;
 
-    const userResult = await client.query('SELECT * FROM user_master WHERE userlocation = $1', [glbLocaCode]);
+    const userResult = await client.query('SELECT * FROM user_master order by username');
     const users = userResult.rows;
 
-    res.render('login', { glbLocaCode, glbLocaName, users });
+    res.render('login', { users });
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).send('Error fetching Locations');
@@ -70,33 +71,6 @@ router.get('/', async(req, res) => {
   }
 });
 
-// POST route to handle Employee Add form submission
-router.post('/employee-add', upload.single('image'), async(req, res) => {
-  
-  const client = await pool.connect();
-  const { fname, lname, addr1, addr2, city, state, pincode, mobile, email, esino, uanno } = req.body;
-//  const imageUrl = `/uploads/${req.file.filename}`; // Image path
-
-   let imageUrl = null;
-   if (req.file) {
-      imageUrl = `/uploads/${req.file.filename}`; // Construct the image URL
-  }
-
-  // Insert data into the database 
-  const query = `INSERT INTO employee_master (fname, lname, addr1, addr2, city, state, pincode, mobile, email, esino, uanno, fotourl, location_id)
-                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`;
-  const values = [fname, lname, addr1, addr2, city, state, pincode, mobile, email, esino, uanno, imageUrl, glbLocaCode];
-  
-  client.query(query, values, (err, result) => {
-      if (err) {
-          console.error('Error inserting data:', err);
-          res.status(500).send('Error saving Employee Data');
-      } else {
-          
-          res.render('employee-add', { glbUserName, glbLocaName, glbLocaCode });
-      }
-  });
-});
 
 // Route to handle Attendance Entry Employee Selection
 router.get('/attendance', async (req, res) => {
@@ -138,18 +112,47 @@ router.get('/attendance-submit', (req, res) => {
   if (!key || !cells) {
       return res.status(400).send("Invalid data provided.");
   }
-
   res.render('attendance-submit', { key, cells, glbLocaCode });
 });
 
 
 // Route to handle employee
 router.get('/employee', async (req, res) => {
+  if (glbUserType === 'admin') {
+    const client = await pool.connect();
+    try {
+        const result = await client.query('SELECT * FROM employee_master order by fname, lname');
+    const employees = result.rows;
+    res.render('employee_list', { employees, glbUserName, glbLocaName, glbLocaCode, glbUserType });
+  } catch (err) {
+    console.error('Error executing query', err);
+    res.status(500).send('Error fetching Employees');
+  } finally {
+    client.release();
+  }
+} else {
   const client = await pool.connect();
   try {
-    const result = await client.query('SELECT * FROM employee_master where location_id = $1 order by fname, lname', [glbLocaCode]);
-    const employees = result.rows;
-    res.render('employee_list', { employees, glbUserName, glbLocaName, glbLocaCode });
+     const result = await client.query('SELECT * FROM employee_master where location_id = $1 order by fname, lname', [glbLocaCode]);
+
+  const employees = result.rows;
+  res.render('employee_list', { employees, glbUserName, glbLocaName, glbLocaCode, glbUserType });
+} catch (err) {
+  console.error('Error executing query', err);
+  res.status(500).send('Error fetching Employees');
+} finally {
+  client.release();
+}
+}
+});
+
+//  GET Route to handle Employee Addition
+router.get('/employee-add', async(req, res) => {
+  const client = await pool.connect();
+  try {
+    const result = await client.query('SELECT * FROM location_master order by location_name');
+    const locations = result.rows;
+    res.render("employee-add",  { locations, glbUserName, glbLocaName, glbLocaCode });
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).send('Error fetching Employees');
@@ -158,21 +161,41 @@ router.get('/employee', async (req, res) => {
   }
 });
 
-//  GET Route to handle Employee Addition
-router.get('/employee-add', (req, res) => {
-  res.render("employee-add",  { glbUserName, glbLocaName, glbLocaCode });
+// POST route to handle Employee Add form submission
+router.post('/employee-add', upload.single('image'), async(req, res) => {
+  const client = await pool.connect();
+  const { location_name, fname, lname, addr1, addr2, city, state, pincode, mobile, email, esino, uanno } = req.body;
+
+   let imageUrl = null;
+   if (req.file) {
+      imageUrl = `/uploads/${req.file.filename}`; // Construct the image URL
+  }
+  // Query to get Location ID from Location_Master
+  const result = await client.query('SELECT id FROM location_master WHERE location_name = $1', [location_name]);
+  const location = result.rows[0]; 
+  // Insert data into the database 
+  const query = `INSERT INTO employee_master (fname, lname, addr1, addr2, city, state, pincode, mobile, email, esino, uanno, fotourl, location_id)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`;
+  const values = [fname, lname, addr1, addr2, city, state, pincode, mobile, email, esino, uanno, imageUrl, location.id];
+  client.query(query, values, (err, result) => {
+      if (err) {
+          console.error('Error inserting data:', err);
+          res.status(500).send('Error saving Employee Data');
+      } else {
+        console.log("From POST Route - Redirecting to Employee Add Form");
+          res.render("employee-add", { glbUserName, glbLocaName, glbLocaCode });
+      }
+  });
 });
 
 // POST Route to handle Login Form submission
 router.post('/login', async (req, res) => {
   const { username, password } = req.body; // Get username and password from the form
   const client = await pool.connect();
-  
   try {
     // Query to get user information by username
-    const userResult = await client.query('SELECT userid, username, userpwd, usertype FROM user_master WHERE username = $1', [username]);
-
-    // Check if user exists
+    const userResult = await client.query('SELECT userid, username, userpwd, usertype, userlocation, location_master.location_name FROM user_master, location_master WHERE user_master.username = $1 and user_master.userlocation = location_master.id', [username]);
+// Check if user exists
     if (userResult.rows.length > 0) {
       const uname = userResult.rows[0]; 
 
@@ -187,6 +210,9 @@ router.post('/login', async (req, res) => {
 */
         // Redirect to menu page
         glbUserName = uname.username
+        glbLocaCode = uname.userlocation
+        glbLocaName = uname.location_name
+        glbUserType = uname.usertype
         res.redirect('/navbar');
       } else {
         // Password is incorrect
@@ -224,36 +250,6 @@ router.get('/location', async (req, res) => {
   }
 });
 
-// Route to list all Locations
-// router.get('/location/search/:txt', async (req, res) => {
-//   const client = await pool.connect();
-//   try {
-//     const result = await client.query('SELECT * FROM location_master where location_name like ":txt%" order by location_name');
-//     const locations = result.rows;
-//     res.render('location_list', { locations });
-//   } catch (err) {
-//     console.error('Error executing query', err);
-//     res.status(500).send('Error fetching Locations');
-//   } finally {
-//     client.release();
-//   }
-// });
-
-router.get('/searchLocations/:searchTxt', async (req, res) => {
-
-  try {
-      const searchTxt = req.query.searchTxt.toLowerCase();
-      
-      // Execute a query to fetch locations based on the search text
-      const result = await client.query('SELECT * FROM location_master WHERE location_name ILIKE $1', [`%${searchTxt}%`]);
-      // Send the fetched data as JSON
-      res.json(result.rows);
-    
-  } catch (error) {
-      console.error('Error searching locations:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
 
 // Route to handle Location Add Form Display request
 router.get('/location-add', (req, res) => {

@@ -5,9 +5,13 @@
         function homeClicked () {
         window.location.href="/navbar";
         }
+
         function locationAdd () {
-            window.location.href="/location-add";
+            if glbUserType = 'admin' {
+                window.location.href="/location-add";
+            };
         }
+
         function filterTable() {
         const searchValue = document.getElementById('searchFld').value.toLowerCase(); // Get search input value
         
@@ -69,7 +73,7 @@
         </div>  
     </div>
       <form class="location_form">
-        <div class="location_table_wrapper">
+        <div class="location_table_wrapper" style="overflow-x:auto;">
             <table class="location_table" id="location_table">
                 <thead>
                     <tr>
