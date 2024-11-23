@@ -7,9 +7,10 @@
         }
 
         function locationAdd () {
-            if glbUserType = 'admin' {
+            let uType = "<%=glbUserType%>";
+            if (uType==="admin") {
                 window.location.href="/location-add";
-            };
+            }
         }
 
         function filterTable() {
@@ -65,7 +66,6 @@
       <div class="location-form-top">
         <div class="location-form-top-left">
             <input type="text" id="searchFld" class="searchFld" name="searchFld" placeholder="Search for Location" onkeyup="filterTable()">
-<!--            <button id="searchBtn" class="btnSearch"><i class="fa-solid fa-magnifying-glass" style="background-color: rgb(94, 203, 239)"></i>&nbsp Search</button>  -->
         </div>
         <div class="location-form-top-right">
             <button id="addBtn" class="btnAdd" onclick="locationAdd()"><i class="fa-solid fa-plus" style="background-color:rgb(94, 239, 94)"></i>&nbsp Add Location</button>

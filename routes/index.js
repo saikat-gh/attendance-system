@@ -227,9 +227,6 @@ router.put('/employee-update', upload.single('image'), async (req, res) => {
           fname, lname, addr1, addr2, city, state, pincode, mobile, email,
           esino, uanno, location_name, imageFile ? `/uploads/${imageFile.filename}` : null, empId
       ];
-console.log(query);
-console.log(values);
-
       await pool.query(query, values);
 
       res.status(200).json({ message: 'Employee updated successfully' });
@@ -237,6 +234,19 @@ console.log(values);
       console.error('Error updating employee:', error);
       res.status(500).json({ message: 'Failed to update employee' });
   }
+});
+
+// Route to handle the Location Delete request
+router.delete('/employee-delete', (req, res) => {
+  const empId = req.query.id;
+  // Perform delete operation in the database
+  pool.query('DELETE FROM employee_master WHERE id = $1', [empId], (err, result) => {
+      if (err) {
+          console.error(err);
+          return res.status(500).send('Error deleting Employee.');
+      }
+      res.status(200).send('Employee deleted successfully.');
+  });
 });
 
 // POST Route to handle Login Form submission
