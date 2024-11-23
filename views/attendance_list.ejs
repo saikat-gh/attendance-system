@@ -31,7 +31,7 @@
     <div class="attendance-list-form-container">
         <h2> Attendance Entry </h3>
         <h3> Select Employee </h3>
-        <h4> Location :  <%= glbLocaName %> </h4>
+        <h4> Location :  <%= location_name %> </h4>
         
         <form class="employee_attendance_form">
             <div class="employee_attendance_table_wrapper">
@@ -43,12 +43,12 @@
                     </thead>
  
                         <% employees.forEach(employee => { %>
-                            <tr data-key= <%= employee.id %> >
+                            <tr data-key = <%= employee.id %> >
                                 <td> <%= employee.fname %> <%= employee.lname %> </td>
                             </tr>
                         <% }); %>
-    
-                    </table>
+         
+                </table>
             </div>
         </form>        
     </div>

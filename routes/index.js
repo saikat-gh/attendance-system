@@ -73,12 +73,17 @@ router.get('/', async(req, res) => {
 
 
 // Route to handle Attendance Entry Employee Selection
-router.get('/attendance', async (req, res) => {
+router.get('/attendance/:key', async (req, res) => {
+  const locationId = req.params.key;
+  console.log(locationId);
   const client = await pool.connect();
   try {
-    const result = await client.query('SELECT * FROM employee_master where location_id = $1 order by fname, lname', [glbLocaCode]);
-    const employees = result.rows;
-    res.render('attendance_list', { employees, glbUserName, glbLocaName, glbLocaCode });
+    const result1 = await client.query('SELECT location_name from location_master where id = $1', [locationId]);
+    const location_name = result1.rows;
+    const result2 = await client.query('SELECT id, fname, lname FROM employee_master where location_id = $1 order by fname, lname', [locationId]);
+    const employees = result2.rows;
+    console.log(employees);
+    res.render('attendance_list', { employees, locationId, location_name });
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).send('Error fetching Employees');
