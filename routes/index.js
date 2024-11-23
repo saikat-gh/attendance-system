@@ -122,28 +122,27 @@ router.get('/employee', async (req, res) => {
     const client = await pool.connect();
     try {
         const result = await client.query('SELECT * FROM employee_master order by fname, lname');
-    const employees = result.rows;
-    res.render('employee_list', { employees, glbUserName, glbLocaName, glbLocaCode, glbUserType });
-  } catch (err) {
-    console.error('Error executing query', err);
-    res.status(500).send('Error fetching Employees');
-  } finally {
-    client.release();
+        const employees = result.rows;
+        res.render('employee_list', { employees, glbUserName, glbLocaName, glbLocaCode, glbUserType });
+    } catch (err) {
+        console.error('Error executing query', err);
+        res.status(500).send('Error fetching Employees');
+    } finally {
+        client.release();
+    }
+  } else {
+      const client = await pool.connect();
+    try {
+      const result = await client.query('SELECT * FROM employee_master where location_id = $1 order by fname, lname', [glbLocaCode]);
+      const employees = result.rows;
+      res.render('employee_list', { employees, glbUserName, glbLocaName, glbLocaCode, glbUserType });
+    } catch (err) {
+        console.error('Error executing query', err);
+        res.status(500).send('Error fetching Employees');
+    } finally {
+        client.release();
+    }
   }
-} else {
-  const client = await pool.connect();
-  try {
-     const result = await client.query('SELECT * FROM employee_master where location_id = $1 order by fname, lname', [glbLocaCode]);
-
-  const employees = result.rows;
-  res.render('employee_list', { employees, glbUserName, glbLocaName, glbLocaCode, glbUserType });
-} catch (err) {
-  console.error('Error executing query', err);
-  res.status(500).send('Error fetching Employees');
-} finally {
-  client.release();
-}
-}
 });
 
 //  GET Route to handle Employee Addition
@@ -183,9 +182,61 @@ router.post('/employee-add', upload.single('image'), async(req, res) => {
           res.status(500).send('Error saving Employee Data');
       } else {
         console.log("From POST Route - Redirecting to Employee Add Form");
-          res.render("employee-add", { glbUserName, glbLocaName, glbLocaCode });
+        res.render("employee-add", { glbUserName, glbLocaName, glbLocaCode });
       }
   });
+});
+
+// Route to handle the Employee Edit request
+router.get('/employee-edit', async(req, res) => {
+  const empId = req.query.id;
+    // Fetch location details from the database based on locationId
+  const client = await pool.connect();
+  try {
+    const lresult = await client.query('SELECT * FROM location_master order by location_name');
+    const locations = lresult.rows;
+
+    const eresult = await client.query('SELECT employee_master.*, location_master.location_name FROM employee_master, location_master WHERE employee_master.id = $1 and employee_master.location_id = location_master.id', [empId]);
+    const employees = eresult.rows;
+
+    res.render('employee-edit', { employees,locations, glbUserName, glbLocaName  });
+  } catch (err) {
+    console.error('Error executing query', err);
+    res.status(500).send('Error fetching Locations');
+  } finally {
+    client.release();
+  }
+});
+
+router.put('/employee-update', upload.single('image'), async (req, res) => {
+  const empId = req.query.id;
+  const { fname, lname, addr1, addr2, city, state, pincode, mobile, email, esino, uanno, location_name } = req.body;
+  const imageFile = req.file; // Uploaded image file
+
+  try {
+      // Update database with new data
+      const query = `
+          UPDATE employee_master
+          SET fname = $1, lname = $2, addr1 = $3, addr2 = $4, city = $5, state = $6,
+              pincode = $7, mobile = $8, email = $9, esino = $10, uanno = $11,
+              location_id = (SELECT id FROM location_master WHERE location_name = $12),
+              fotourl = $13
+          WHERE id = $14
+      `;
+      const values = [
+          fname, lname, addr1, addr2, city, state, pincode, mobile, email,
+          esino, uanno, location_name, imageFile ? `/uploads/${imageFile.filename}` : null, empId
+      ];
+console.log(query);
+console.log(values);
+
+      await pool.query(query, values);
+
+      res.status(200).json({ message: 'Employee updated successfully' });
+  } catch (error) {
+      console.error('Error updating employee:', error);
+      res.status(500).json({ message: 'Failed to update employee' });
+  }
 });
 
 // POST Route to handle Login Form submission

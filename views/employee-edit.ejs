@@ -1,71 +1,76 @@
 <%- include('menu'); %>
 <body>
-    <div class="emp-add-container">
+    <div class="emp-edit-container">
         <header> Employee Details </header>
-        <form autocomplete="off" class="emp-add-form" method="POST" action="/employee-add" enctype="multipart/form-data">
-            <div class="emp-add-input">
-                <div class="emp-entry-fields">
+        <form class="emp-edit-form" onsubmit="event.preventDefault()" enctype="multipart/form-data">
+            <div class="emp-edit-input">
+                <div class="emp-edit-fields">
                     <table style="width:100%" class="emp-add-table">
                         <tr>
                             <td><label for = "location">Location</label></td>
                             <td>
-                                <select class="userselect" id="location_name" name="location_name" required>
+                                <select class="userselect" id="location_name" name="location_name" required> 
                                     <% locations.forEach(function(location) { %>
-                                      <option value="<%= location.location_name %>"><%= location.location_name %></option>
+                                      <option value="<%= location.location_name %>" 
+                                        <%= location.location_name === employees[0].location_name ? 'selected' : '' %>>
+                                        <%= location.location_name %>
+                                      </option>
                                     <% }); %>
-                                </select>                      
+                                  </select>                                                
                             </td>
                         </tr>
                         <tr>
                             <td><lable for ="fname">First Name</lable></td>
-                            <td><input type="text" id="fname" name="fname" placeholder="Enter your First Name" required></td>
+                            <td><input type="text" id="fname" name="fname" value = "<%= employees[0].fname %>" required></td>
                         </tr>
                         <tr>
                             <td><lable for ="lname">Last Name</lable></td>
-                            <td><input type="text" id="lname" name="lname" placeholder="Enter your Last Name" required></td>
+                            <td><input type="text" id="lname" name="lname" value = "<%= employees[0].lname %>" required></td>
                         </tr>
                         <tr>
                             <td><lable for ="addr1">Address Line 1</lable></td>
-                            <td><input type="text" id="addr1" name="addr1" placeholder="Enter Address Line 1" required></td>
+                            <td><input type="text" id="addr1" name="addr1" value = "<%= employees[0].addr1 %>" required></td>
                         </tr>
                         <tr>
                             <td><lable for ="addr2">Address Line 2</lable></td>
-                            <td><input type="text" id="addr2" name="addr2" placeholder="Enter Address Line 2" required></td>
+                            <td><input type="text" id="addr2" name="addr2" value = "<%= employees[0].addr2 %>" required></td>
                         </tr>
                         <tr>
                             <td><lable for ="city">City</lable></td>
-                            <td><input type="text" id="city" name="city" placeholder="Enter your City" required></td>
+                            <td><input type="text" id="city" name="city" value = "<%= employees[0].city %>" required></td>
                         </tr>
                         <tr>
                             <td><lable for ="state">State</lable></td>
-                            <td><input type="text" id="state" name="state" placeholder="Enter your State" required></td>
+                            <td><input type="text" id="state" name="state" value = "<%= employees[0].state %>" required></td>
                         </tr>
                         <tr>
                             <td><lable for ="pincode">Pin Code</lable></td>
-                            <td><input type="text" id="pincode" name="pincode" placeholder="Enter your Pin Code" required></td>
+                            <td><input type="text" id="pincode" name="pincode" value = "<%= employees[0].pincode %>" required></td>
                         </tr>
                         <tr>
                             <td><lable for ="mobile">Mobile No</lable></td>
-                            <td><input type="text" id="mobile" name="mobile" placeholder="Enter your Mobile Number" required></td>
+                            <td><input type="text" id="mobile" name="mobile" value = "<%= employees[0].mobile %>" required></td>
                         </tr>
                         <tr>
                             <td><lable for ="email">Email</lable></td>
-                            <td><input type="text" id="email" name="email" placeholder="Enter your E-mail" required></td>
+                            <td><input type="text" id="email" name="email" value = "<%= employees[0].email %>" required></td>
                         </tr>
                         <tr>
                             <td><lable for ="esino">ESI Number</lable></td>
-                            <td><input type="text" id="esino" name="esino" placeholder="Enter ESI Number" required></td>
+                            <td><input type="text" id="esino" name="esino" value = "<%= employees[0].esino %>" required></td>
                         </tr>
                         <tr>
                             <td><lable for ="uanno">UAN Number</lable></td>
-                            <td><input type="text" id="uanno" name="uanno" placeholder="Enter UAN number" required></td>
+                            <td><input type="text" id="uanno" name="uanno" value = "<%= employees[0].uanno %>" required></td>
                         </tr>
 
                     </table>
                 </div>
                 
                 <div class="image-entry">
-                    <div class="image-box" id="image-box"></div>
+                    <div class="image-box" id="image-box">
+                        <img src="<%= employees[0].fotourl %>" alt="Italian Trulli">
+                    </div>
                     <input type="file" id="image" name="image" accept="image/*">
                     <div class="camera-container">
                         <video id="video" autoplay playsinline></video>
@@ -78,7 +83,7 @@
                 </div>
             </div>
             <div class="btnGroup">
-                <button class="btnSubmit" type="submit">Submit</button></a>
+                <button class="btnSubmit" type="button" onClick="updateEmployee(this.form, <%= employees[0].id %>)">Submit</button></a>
                 <button class="btnReset" type="reset">Reset Data</button>
                 <a href="/employee"><button class="btnReturn" type="button">Return</button></a>
             </div>
@@ -96,6 +101,8 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     console.log(e.target.result);
+                    imageBox.style.backgroundImage = 'none';
+                    imageBox.innerHTML = '';
                     imageBox.style.backgroundImage = `url(${e.target.result})`;
                     imageBox.style.backgroundSize = 'cover';
                     imageBox.style.backgroundPosition = 'center';
@@ -104,7 +111,7 @@
             }
         });
     </script>
-<script>
+    <script>
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const captureBtn = document.getElementById('capture-btn');
@@ -158,34 +165,29 @@
     });
 
     // Handle form submission with the captured image and form data
-    document.querySelector('.emp-add-form').addEventListener('submit', async (event) => {
-        event.preventDefault(); // Prevent default form submission
-
-        // Create a new FormData object to send form data and the captured image
-        const formData = new FormData(event.target); // Automatically gather form inputs (fname, lname, etc.)
+    function updateEmployee(form,empId) {
+      // Create a new FormData object to send form data and the captured image
+        const formData = new FormData(form); // Automatically gather form inputs (fname, lname, etc.)
         if (capturedBlob) {
             formData.append('image', capturedBlob, 'photo.png'); // Append the captured image Blob with a filename
         }
-
         // Send the form data and the captured image to the backend via fetch
-        try {
-            const response = await fetch('/employee-add', {
-                method: 'POST',
+        fetch(`/employee-update?id=${empId}`, {
+                method: 'PUT',
                 body: formData,
-            });
-
-            if (response.ok) {
-                console.log('Data and image uploaded successfully');
-                // Optional: Redirect or show a success message
-                alert("Data Saved from Employee-Add Script");
-                res.render('employee-add', { glbUserName, glbLocaName, glbLocaCode });
-            } else {
-                console.error('Upload failed');
+            })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to Update Employee Data');
             }
-        } catch (error) {
-            console.error('Error during upload:', error);
-        }
-    });
+            return response.text();
+        })
+        .then(message => {
+            console.log(message);
+            // Redirect on Success
+            window.location.href = "/employee";
+        })
+        .catch(error => console.error('Error Updating Employee Details:', error));
+    };
 </script>
 </body>
-</html>
