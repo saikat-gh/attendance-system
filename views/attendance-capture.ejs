@@ -245,6 +245,9 @@
 
         displayLocation();
 
+        // Update the location every second
+        setInterval(displayLocation, 1000);        
+
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const captureBtn = document.getElementById('capture-btn');
