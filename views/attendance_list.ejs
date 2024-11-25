@@ -1,27 +1,32 @@
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         .attendance-list-form-container {
             background-color: rgb(240, 240, 112);
             border: 1px solid brown;
-            max-width: 375px;
-            max-height: 640px;
+            max-width: 90%; /* Use percentage for width */
+            max-height: 90vh; /* Use viewport height for vertical limits */
             overflow-y: auto;
+            margin: 0 auto; /* Center the container horizontally */
         }
         h2 , h3, h4 {
             text-align: center;
+            font-size: 1.2em; /* Scale text size for better readability */
         }
         h2 {
-            margin-bottom: 3px;
+            margin-bottom: 0.5rem; /* Use rem for consistent spacing */
         }
         h3 {
-            margin-top: 3px;
-            margin-bottom: 3px;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
         }
         h4 {
-            margin-top: 3px;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
         }
         #employee_attendance_table {
-            width: 100%;
+            width: 100%; /* Ensure the table spans the container width */
         }
         #employee_attendance_table th {
             background-color: rgb(105, 89, 8);
@@ -29,16 +34,18 @@
             text-align: center;
             position: sticky;
             top: 0;
+            font-size: 1rem; /* Adjust font size */
         }
         #employee_attendance_table tr:hover td {
             background-color: #bef7f7;
         }
         #employee_attendance_table tr {
-            height: 35px;
+            height: 3rem; /* Use rem for row height */
         }
         #employee_attendance_table, th, td {
             border: 1px solid black;
             border-collapse: collapse;
+            font-size: 0.9rem; /* Slightly smaller font for cells */
         }
     </style>
 </head>
