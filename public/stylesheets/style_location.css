@@ -193,7 +193,7 @@
 }
 
 .location-add-form-container{
-    height: 350px;
+    height: 430px;
     width: 600px;
     background-color: rgb(201, 236, 78);
     position: absolute;
@@ -286,21 +286,6 @@
     background-color: #918f8f;
 }
 
-.location-add-form-container{
-    height: 350px;
-    width: 600px;
-    background-color: rgb(201, 236, 78);
-    position: absolute;
-    transform: translate(-50%,-50%);
-    top: 50%;
-    left: 50%;
-    border-radius: 10px;
-    backdrop-filter: blur(10px);
-    border: 2px solid rgba(255,255,255,0.1);
-    box-shadow: 0 0 40px rgba(8,7,16,0.6);
-    padding: 20px 35px;
-}
-
 .location-add-form-container  > h3 {
     background-color: rgb(74, 74, 74);
     text-align: center;
@@ -384,7 +369,7 @@
 }
 
 .location-edit-form-container{
-    height: 350px;
+    height: 430px;
     width: 600px;
     background-color: rgb(201, 236, 78);
     position: absolute;
@@ -475,21 +460,6 @@
 
 .location-edit-body {
     background-color: #918f8f;
-}
-
-.location-edit-form-container{
-    height: 350px;
-    width: 600px;
-    background-color: rgb(201, 236, 78);
-    position: absolute;
-    transform: translate(-50%,-50%);
-    top: 50%;
-    left: 50%;
-    border-radius: 10px;
-    backdrop-filter: blur(10px);
-    border: 2px solid rgba(255,255,255,0.1);
-    box-shadow: 0 0 40px rgba(8,7,16,0.6);
-    padding: 20px 35px;
 }
 
 .location-edit-form-container  > h3 {

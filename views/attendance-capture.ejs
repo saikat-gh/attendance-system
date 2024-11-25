@@ -1,0 +1,250 @@
+<head>
+    <style>
+        *{
+           margin: 0;
+           padding: 0;
+        }
+        .attendance-capture-form-container {
+            background-color: rgb(241, 241, 207);
+            border: 1px solid brown;
+            max-width: 375px;
+            max-height: 640px;
+        }
+        h3, h5 {
+            text-align: center;
+        }
+        h3 {
+            margin-top: 3px;
+            margin-bottom: 3px;
+        }
+        h5 {
+            margin-top: 3px;
+        }
+        .top-container {
+            display: flex;
+            width: 100%;
+            height:190px
+        }
+        .left-container {
+            width: 50%;
+            border: 1px solid black;
+        }
+        .right-container {
+            width: 50% ;
+            border: 1px solid black;
+        }
+        .mid-container {
+            width: 100%;
+            height: 25px;
+            border: 1px solid black;
+        }
+        .bottom-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 350px;
+            border: 1px solid black;
+        }
+        #curDate {
+            padding: 0px;
+            margin: 0px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            width: 100%; 
+        }
+        #clock {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 0px;
+            border: 1px solid black;
+        }
+        .image img {
+            width: 180px;
+            height: 180px;
+            border: 1px solid black;
+        }
+        #video {
+            width: 300px; 
+            height: 250px;
+            object-fit: cover; /* Adjust how the video fits within the specified dimensions */
+            border: 1px solid black;
+            box-shadow: 0 0 10px 5px rgba(0,0,0,0.3);
+            margin-left: 30px;
+        }
+
+        canvas {
+            display: none;
+        }
+
+        .camera-btn-grp {
+            display: flex;
+            gap: 25px;
+            width: 250px;
+            margin-left: 60px;
+            margin-top: 5px;
+        }
+
+        #start-btn {
+            background-color: springgreen;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            width: 100px;
+            padding-top: 5px;
+            padding-bottom: 5px;   
+        }
+        #capture-btn {
+            background-color: #4070f4;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            width: 100px;    
+            padding-top: 5px;
+            padding-bottom: 5px;   
+        }
+        .btn-grp {
+            display: flex;
+            gap: 25px;
+            width: 250px;
+            margin-left: 60px;
+            margin-top: 10px;
+        }
+
+        #submit-btn {
+            background-color: green;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;  
+            width: 150px;
+            padding-top: 10px;
+            padding-bottom: 10px;   
+
+        }
+        #cancel-btn {
+            background-color: red;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;  
+            width: 150px;
+            padding-top: 10px;
+            padding-bottom: 10px;   
+
+        }
+    </style>
+</head>
+<body>
+    <div class="attendance-capture-form-container">
+        <h3> Attendance Entry </h3>
+        <h5> <%= empName %> </h5>
+        <h5> <%= location %> </h5>
+        <%= otherData[0].location_id %>
+        <%= otherData[0].lat %>
+        <%= otherData[0].long %>
+        <form class = "attendance-submit-form">
+            <div class="top-container">
+                <div class="left-container">
+                    <div class="image">
+                        <img src="<%= otherData[0].fotourl %>" alt="Italian Trulli">
+                    </div>
+                </div>
+                <div class="right-container">
+                    <label>Today : </label>
+                    <input type="text" id="curDate" readonly>
+                    <label>Now :</label>
+                    <div id="clock"></div>
+                    <label>Your Location</label><br>
+                    <lable>Latitude</lable>
+                    <input type="text" id="curLat" value = "" readonly>
+                    <label>Longitude</label>
+                    <input type="text" id="curLong" value = "" readonly>
+                </div>
+            </div>
+            <div class="mid-container">
+
+            </div>
+            <div class="bottom-container">
+                <div class="camera-container">
+                    <video id="video" autoplay playsinline></video>
+                    <div class="camera-btn-grp">
+                        <button id="start-btn" name="start-btn" type="button">Start Camera</button>
+                        <button id="capture-btn" name="capture-btn" type="button">Capture Photo</button>
+                    </div>       
+                    <canvas id="canvas" style="display: none;"></canvas>
+                </div>
+                <div class="btn-grp">
+                    <button id="submit-btn" name="submit-btn" type="button">Submit</button>           
+                    <button id="cancel-btn" name="cancel-btn" type="button">Cancel</button>           
+                </div>
+            </div>
+        </form>
+    </div>
+    <script>
+        // Get the current date
+        const currentDate = new Date();
+
+        // Helper function to format the date
+        function formatDate(date) {
+            const day = String(date.getDate()).padStart(2, '0'); // Get day (2 digits)
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const month = monthNames[date.getMonth()]; // Get month name
+            const year = date.getFullYear(); // Get year
+            return `${day}-${month}-${year}`; // Return formatted date
+        }
+
+        // Format the current date
+        const formattedDate = formatDate(currentDate);
+
+        // Display the date in the input field
+        document.getElementById('curDate').value = formattedDate;
+
+        // Function to format and display the time
+        function displayTime() {
+            const now = new Date();
+
+            // Extract hours, minutes, and seconds
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            // Format the time as HH:MM:SS
+            const timeString = `${hours}:${minutes}:${seconds}`;
+
+            // Display the time in the clock div
+            document.getElementById('clock').textContent = timeString;
+        }
+
+        // Initial display
+        displayTime();
+
+        // Update the time every second
+        setInterval(displayTime, 1000);        
+
+        const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const captureBtn = document.getElementById('capture-btn');
+    const startBtn = document.getElementById('start-btn');
+    const imageBx = document.getElementById('image-box'); // Where the captured image will be displayed
+    let capturedBlob = null; // To store the captured image blob
+
+    // Request access to the camera
+    async function startCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+        } catch (error) {
+            console.error('Error accessing the camera: ', error);
+        }
+    }
+
+    startBtn.addEventListener('click', (event) => {
+        event.preventDefault(); // Prevent form submission
+        startCamera();
+    });
+    </script>
+</body>

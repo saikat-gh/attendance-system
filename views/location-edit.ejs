@@ -13,20 +13,29 @@
                 </tr>
                 <tr>
                     <td><label for="address1">Address Line 1</label></td>
-                    <td><input type="text" id="address1" name="address1" value = "<%= locations[0].location_addr1 %>" required></td>
+                    <td><input type="text" id="address1" name="address1" value = "<%= locations[0].location_addr1 %>" ></td>
                 </tr>
                 <tr>
                     <td><label for="address2">Address Line 2</label></td>
-                    <td><input type="text" id="address2" name="address2" value = "<%= locations[0].location_addr2 %>" required></td>
+                    <td><input type="text" id="address2" name="address2" value = "<%= locations[0].location_addr2 %>" ></td>
                 </tr>
                 <tr>
                     <td><label for="address3">Address Line 3</label></td>
-                    <td><input type="text" id="address3" name="address3" value = "<%= locations[0].location_addr3 %>" required></td>
+                    <td><input type="text" id="address3" name="address3" value = "<%= locations[0].location_addr3 %>" ></td>
                 </tr>
                 <tr>
                     <td><label for="abbr">Abbreviation</label></td>
-                    <td><input type="text" id="abbr" name="abbr" maxlength="10" value = "<%= locations[0].abbr %>" ></td>
+                    <td><input type="text" id="abbr" name="abbr" maxlength="10" value = "<%= locations[0].abbr %>" required></td>
                 </tr>
+                <tr>
+                    <td><label for="lat">Latitude</label></td>
+                    <td><input type="text" id="lat" name="lat" maxlength="10" value = "<%= locations[0].lat %>" required></td>
+                </tr>
+                <tr>
+                    <td><label for="long">Longitude</label></td>
+                    <td><input type="text" id="long" name="long" maxlength="10" value = "<%= locations[0].long %>" required> </td>
+                </tr>
+
             </table>
            
             <div class="btnGroup">

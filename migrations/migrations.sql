@@ -49,3 +49,16 @@
 --	CONSTRAINT employee_master_location_master_fk FOREIGN KEY (location_id) REFERENCES public.location_master(id)
 --);
 --CREATE UNIQUE INDEX employee_master_id_idx ON public.employee_master USING btree (id);
+
+-- CREATE TABLE public.attendance (
+-- 	"date" date NOT NULL,
+-- 	"time" time NOT NULL,
+-- 	empid int4 NOT NULL,
+-- 	lat varchar NOT NULL,
+-- 	long varchar NOT NULL,
+-- 	"valid" boolean NOT NULL,
+-- 	location_id int4 NOT NULL
+-- );
+
+-- ALTER TABLE public.location_master ADD lat varchar NULL;
+-- ALTER TABLE public.location_master ADD long varchar NULL;

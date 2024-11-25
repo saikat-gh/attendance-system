@@ -75,14 +75,12 @@ router.get('/', async(req, res) => {
 // Route to handle Attendance Entry Employee Selection
 router.get('/attendance/:key', async (req, res) => {
   const locationId = req.params.key;
-  console.log(locationId);
   const client = await pool.connect();
   try {
     const result1 = await client.query('SELECT location_name from location_master where id = $1', [locationId]);
     const location_name = result1.rows;
-    const result2 = await client.query('SELECT id, fname, lname FROM employee_master where location_id = $1 order by fname, lname', [locationId]);
+    const result2 = await client.query('SELECT id, fname, lname, fotourl FROM employee_master where location_id = $1 order by fname, lname', [locationId]);
     const employees = result2.rows;
-    console.log(employees);
     res.render('attendance_list', { employees, locationId, location_name });
   } catch (err) {
     console.error('Error executing query', err);
@@ -112,14 +110,42 @@ router.get('/attendance-submit/:key', async(req, res) => {
 });
 
 
-router.get('/attendance-submit', (req, res) => {
-  const { key, cells } = req.query;
-  if (!key || !cells) {
-      return res.status(400).send("Invalid data provided.");
-  }
-  res.render('attendance-submit', { key, cells, glbLocaCode });
+// Route From Attendance_List.EJS to capture Attendance
+router.get('/attendance-capture', async (req, res) => {
+  // Extract data from query parameters
+  const empId = req.query.empId; // Employee ID
+  const empName = JSON.parse(decodeURIComponent(req.query.empName)); // Row Data (parsed from JSON)
+  const location = req.query.location; // Location Name
+  const client = await pool.connect();
+  try {
+    const result = await client.query('SELECT employee_master.fotourl, employee_master.location_id, location_master.lat, location_master.long FROM employee_master, location_master where employee_master.id = $1 and location_master.id = employee_master.location_id', [empId] );
+    const otherData = result.rows;
+    res.render('attendance-capture', {empId, empName, location, otherData });
+} catch (err) {
+    console.error('Error executing query', err);
+    res.status(500).send('Error fetching Other Data from Employees and Location');
+} finally {
+    client.release();
+}
 });
 
+// Route to fetch latitude and longitude for a location_id
+router.get('/get-location/:id', async (req, res) => {
+  const locationId = req.params.id;
+  const client = await pool.connect();
+  try {
+      const result = await client.query('SELECT lat, long FROM location_master WHERE id = $1',[locationId]);
+      res.send(result.rows);
+      if (result.rows.length > 0) {
+          res.json(result.rows[0]);
+      } else {
+          res.status(404).json({ error: 'Location not found' });
+      }
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Server error' });
+  }
+});
 
 // Route to handle employee
 router.get('/employee', async (req, res) => {
@@ -269,7 +295,7 @@ router.post('/login', async (req, res) => {
         // Password matches
 /*
         req.session.uname = {
-          id: uname.userid,
+          id: uname.userid,`
           username: uname.username,
           usertype: uname.usertype
         };
@@ -307,7 +333,7 @@ router.get('/location', async (req, res) => {
     const result = await client.query('SELECT * FROM location_master order by location_name');
 //    console.log(result.rows);
     const locations = result.rows;
-    res.render('location_list', { locations, glbUserName, glbLocaName  });
+    res.render('location_list', { locations, glbUserName, glbLocaName, glbUserType });
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).send('Error fetching Locations');
@@ -327,9 +353,9 @@ router.post('/location-add', async (req, res) => {
   const client = await pool.connect();
   try {
     console.log(req.body)
-    const { location_name, address1, address2, address3, abbr } = req.body;
+    const { location_name, address1, address2, address3, abbr, lat, long } = req.body;
       // Insert data into the database
-      const result = await client.query('INSERT INTO location_master (location_name, location_addr1, location_addr2, location_addr3, abbr) VALUES ($1, $2, $3, $4, $5)', [location_name, address1, address2, address3, abbr]);
+      const result = await client.query('INSERT INTO location_master (location_name, location_addr1, location_addr2, location_addr3, abbr, lat, long) VALUES ($1, $2, $3, $4, $5, $6, $7)', [location_name, address1, address2, address3, abbr, lat, long]);
       res.render("location-add", { glbUserName, glbLocaName  });
   } catch (error) {
       console.error('Error inserting data:', error);
