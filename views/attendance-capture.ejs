@@ -22,15 +22,25 @@
 
         .top-container {
             display: flex;
-            flex-wrap: wrap; /* Enable wrapping for smaller screens */
+ /*           flex-wrap: wrap; /* Enable wrapping for smaller screens */
             gap: 10px; /* Add spacing between containers */
         }
 
-        .left-container,
-        .right-container {
+        .left-container {
             flex: 1 1 45%; /* Allow containers to share space evenly */
             border: 1px solid black;
             padding: 5px;
+        }
+
+        .right-container {
+            flex: 1 1 45%;
+            border: 1px solid black;
+            padding: 1px;
+            position: relative; /* Required for absolute positioning */
+            display: flex;
+            flex-direction: column; 
+            align-items: center; /* Center horizontally */
+            min-height: 200px; /* Ensure enough height for proper spacing */
         }
 
         .image img {
@@ -40,11 +50,10 @@
             border: 1px solid black;
         }
 
-        #curDate, #clock {
+        #curDate, #curTime {
             font-size: 18px; /* Adjust font size for mobile */
             font-weight: bold;
             text-align: center;
-            width: 100%;
         }
 
         .mid-container {
@@ -52,6 +61,7 @@
             margin-top: 10px;
             border: 1px solid black;
             padding: 5px;
+            text-align: center;
         }
 
         .bottom-container {
@@ -69,7 +79,14 @@
             border: 1px solid black;
             box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.3);
         }
-
+        #canvas {
+            display: none; /* Initially hidden */
+            width: 100%; /* Match video width */
+            max-height: 200px; /* Match video height */
+            object-fit: cover; /* Preserve aspect ratio */
+            border: 1px solid black; /* Match video border */
+            box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.3); /* Match video shadow */
+        }
         .camera-btn-grp, .btn-grp {
             display: flex;
             justify-content: space-between;
@@ -119,6 +136,42 @@
                 font-size: 16px;
             }
         }
+        .date {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .time {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }        
+        .lblCurLoca {
+            text-align: center;
+            width: 100%; 
+            margin-top: 10px;
+            font-style: oblique;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        .location-table, input{
+            font-weight: bold;
+        }
+        .location-table td {
+            padding: 0 2px;
+        }
+        .locaUpdt-btn {
+            background-color: aquamarine;
+            border-radius: 5px;
+            border: none;
+            padding: 5px 20px;
+            position: absolute;
+            bottom: 5px; /* Stick to the bottom */
+            left: 50%; /* Move to the horizontal center */
+            transform: translateX(-50%); /* Adjust for centering */
+        }
     </style>
 </head>
 <body>
@@ -126,9 +179,6 @@
         <h3> Attendance Entry </h3>
         <h5> <%= empName %> </h5>
         <h5> <%= location %> </h5>
-        <%= otherData[0].location_id %>
-        <%= otherData[0].lat %>
-        <%= otherData[0].long %>
         <form class = "attendance-submit-form">
             <div class="top-container">
                 <div class="left-container">
@@ -137,19 +187,30 @@
                     </div>
                 </div>
                 <div class="right-container">
-                    <label>Today : </label>
-                    <input type="text" id="curDate" readonly>
-                    <label>Now :</label>
-                    <div id="clock"></div>
-                    <label>Your Current Location</label><br>
-                    <lable>Latitude</lable>
-                    <div id="curLat"></div>
-                    <label>Longitude</label>
-                    <div id="curLong"></div>
+                    <div class="date">
+                         <input type="text" id="curDate" readonly>
+                    </div>
+                    <div class="time">
+                        <input type="text" id="curTime" readonly>
+                    </div>
+
+                    <label class="lblCurLoca">Current Location</label>
+
+                    <table style="width:100%" class="location-table">
+                        <tr>
+                            <td><lable>Latitude</lable></td>
+                            <td><input type="text" id="curLat" readonly></td>
+                        </tr>
+                        <tr>
+                            <td><lable>Longitude</lable></td>
+                            <td><input type="text" id="curLong" readonly></td>
+                        </tr>
+                    </table>
+                    <button class="locaUpdt-btn" type="button" onclick="displayLocation()">Update Location</button>
                 </div>
             </div>
             <div class="mid-container">
-
+                &nbsp;
             </div>
             <div class="bottom-container">
                 <div class="camera-container">
@@ -168,6 +229,7 @@
         </form>
     </div>
     <script>
+        
         // Get the current date
         const currentDate = new Date();
 
@@ -199,7 +261,7 @@
             const timeString = `${hours}:${minutes}:${seconds}`;
 
             // Display the time in the clock div
-            document.getElementById('clock').textContent = timeString;
+            document.getElementById('curTime').value = timeString;
         }
 
         // Initial display
@@ -208,66 +270,101 @@
         // Update the time every second
         setInterval(displayTime, 1000);        
 
-        function displayLocation() {
+        function displayLocation(event) {
+            const knownLocation = { latitude: <%= otherData[0].lat %>, longitude: <%= otherData[0].long %> };
+            const midContainer = document.querySelector('.mid-container'); // Get the element
+
             if (navigator.geolocation) {
                 // Get the current position
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
+                navigator.geolocation.getCurrentPosition((position) => {
                         const latitude = position.coords.latitude;
                         const longitude = position.coords.longitude;
-
-                        document.getElementById('curLat').textContent = latitude;
-                        document.getElementById('curLong').textContent = longitude;
+                        const userLocation = {
+                                                latitude: position.coords.latitude,
+                                                longitude: position.coords.longitude
+                                            };
+                        document.getElementById('curLat').value = latitude;
+                        document.getElementById('curLong').value = longitude;
+                        // Check if the user is within a 5 km radius
+                        // const radius = 5.000; // Radius in meters
+                        // const withinRadius = isPointWithinRadius(userLocation, knownLocation, radius);
+                        // if (withinRadius) {
+                        //     midContainer.textContent = "You are within the desired radius";
+                        // } else {
+                        //     midContainer.textContent = "You are out of reach";
+                        // }
                     },
                     (error) => {
                         // Handle errors
                         switch (error.code) {
                             case error.PERMISSION_DENIED:
-                                output.textContent = "User denied the request for Geolocation.";
+                                midContainer.textContent = "User denied the request for Geolocation.";
                                 break;
                             case error.POSITION_UNAVAILABLE:
-                                output.textContent = "Location information is unavailable.";
+                                midContainer.textContent = "Location information is unavailable.";
                                 break;
                             case error.TIMEOUT:
-                                output.textContent = "The request to get user location timed out.";
+                                midContainer.textContent = "The request to get user location timed out.";
                                 break;
                             default:
-                                output.textContent = "An unknown error occurred.";
+                                midContainer.textContent = "An unknown error occurred.";
                                 break;
                         }
                         console.error('Error fetching location:', error);
                     }
                 );
             } else {
-                output.textContent = "Geolocation is not supported by this browser.";
+                midContainer.textContent = "Geolocation is not supported by this browser.";
             }
         }
 
         displayLocation();
 
         // Update the location every second
-        setInterval(displayLocation, 1000);        
+//        setInterval(displayLocation, 1000);        
 
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const captureBtn = document.getElementById('capture-btn');
-        const startBtn = document.getElementById('start-btn');
-        const imageBx = document.getElementById('image-box'); // Where the captured image will be displayed
-        let capturedBlob = null; // To store the captured image blob
+        const video = document.getElementById('video'); // The video element
+        const canvas = document.getElementById('canvas'); // The canvas element
+        const startBtn = document.getElementById('start-btn'); // Start camera button
+        const captureBtn = document.getElementById('capture-btn'); // Capture photo button
 
-        // Request access to the camera
-        async function startCamera() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                video.srcObject = stream;
-            } catch (error) {
-                console.error('Error accessing the camera: ', error);
-            }
+        let stream = null; // Variable to hold the video stream
+
+        // 1. Start Camera
+        startBtn.addEventListener('click', async () => {
+        try {
+            // Request camera access
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream; // Set the video feed
+            video.play(); // Start the video playback
+            video.style.display = 'block'; // Ensure the video is visible
+            canvas.style.display = 'none'; // Hide the canvas
+        } catch (error) {
+            console.error('Error accessing the camera:', error);
         }
-
-        startBtn.addEventListener('click', (event) => {
-            event.preventDefault(); // Prevent form submission
-            startCamera();
         });
-    </script>
+
+        // 2. Capture Photo
+        captureBtn.addEventListener('click', () => {
+            if (!stream) {
+                console.error('No video stream available!');
+                return;
+            }
+
+            // Draw the current frame from the video onto the canvas
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Stop the video stream
+            const tracks = stream.getTracks();
+            tracks.forEach((track) => track.stop());
+
+            // Hide the video and show the canvas with the captured image
+            video.style.display = 'none';
+            canvas.style.display = 'block';
+        });
+
+     </script>
 </body>

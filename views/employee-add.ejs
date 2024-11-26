@@ -177,7 +177,6 @@
             if (response.ok) {
                 console.log('Data and image uploaded successfully');
                 // Optional: Redirect or show a success message
-                alert("Data Saved from Employee-Add Script");
                 res.render('employee-add', { glbUserName, glbLocaName, glbLocaCode });
             } else {
                 console.error('Upload failed');

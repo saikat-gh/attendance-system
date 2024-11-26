@@ -221,7 +221,7 @@
     border-collapse: collapse;
     background-color: rgb(201, 236, 78);
     margin-top: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 2px;
     border-spacing: 20px;
     width: 100%;
 }
@@ -294,15 +294,6 @@
     font-weight: bold;
     color: #dbf476;
     padding-bottom: 4px;
-}
-
-.form-location-add-table {
-    border-collapse: collapse;
-    background-color: rgb(201, 236, 78);
-    margin-top: 20px;
-    margin-bottom: 20px;
-    border-spacing: 20px;
-    width: 100%;
 }
 
 .form-location-add-table td {
@@ -397,7 +388,7 @@
     border-collapse: collapse;
     background-color: rgb(201, 236, 78);
     margin-top: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 2px;
     border-spacing: 20px;
     width: 100%;
 }
@@ -470,15 +461,6 @@
     font-weight: bold;
     color: #dbf476;
     padding-bottom: 4px;
-}
-
-.form-location-edit-table {
-    border-collapse: collapse;
-    background-color: rgb(201, 236, 78);
-    margin-top: 20px;
-    margin-bottom: 20px;
-    border-spacing: 20px;
-    width: 100%;
 }
 
 .form-location-edit-table td {

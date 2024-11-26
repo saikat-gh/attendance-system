@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 const multer = require('multer')
 const path = require('path');
+const geolib = require('geolib');
 
 const { Pool } = require('pg');
 
@@ -71,6 +72,24 @@ router.get('/', async(req, res) => {
   }
 });
 
+// Route fetch latitude and longitude from Location Master
+router.get('/get-location/:id', async (req, res) => {
+  const locationId = req.params.id; // Get the location ID from the request
+  try {
+      const query = `SELECT lat, long FROM location_master WHERE id = $1`;
+      const result = await pool.query(query, [locationId]);
+
+      if (result.rows.length > 0) {
+          const { lat, long } = result.rows[0];
+          res.json({ success: true, latitude: lat, longitude: long });
+      } else {
+          res.status(404).json({ success: false, message: 'Location not found.' });
+      }
+  } catch (error) {
+      console.error('Error fetching location:', error);
+      res.status(500).json({ success: false, message: 'Server error.' });
+  }
+});
 
 // Route to handle Attendance Entry Employee Selection
 router.get('/attendance/:key', async (req, res) => {
@@ -388,7 +407,7 @@ router.put('/location-update', (req, res) => {
   if (!locationId) {
     return res.status(400).send('Location ID is required.');
   }
-  const { location_name, address1, address2, address3, abbr } = req.body;
+  const { location_name, address1, address2, address3, abbr, lat, long } = req.body;
   if (!location_name || !address1 || !address2 || !address3) {
     return res.status(400).send('All address fields and name are required.');
   }
@@ -401,11 +420,13 @@ router.put('/location-update', (req, res) => {
       location_addr1 = $2, 
       location_addr2 = $3, 
       location_addr3 = $4, 
-      abbr = $5 
-    WHERE id = $6
+      abbr = $5,
+      lat = $6,
+      long = $7 
+    WHERE id = $8
   `;
   console.log(sql);
-  pool.query(sql, [location_name, address1, address2, address3, abbr, locationId], (err, result) => {
+  pool.query(sql, [location_name, address1, address2, address3, abbr, lat, long, locationId], (err, result) => {
     if (err) {
       console.error('Database error:', err);
       return res.status(500).send('Error updating location.');
