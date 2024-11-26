@@ -33,7 +33,7 @@
             padding: 5px;
  /*           min-width: 100px;*/
             width: 100%;
-            max-height: 200px;
+            height: 250px;
         }
 
         .right-container {
@@ -41,7 +41,7 @@
             border: 1px solid black;
             padding: 1px;
             position: relative; /* Required for absolute positioning */
-            max-height: 200px; /* Ensure enough height for proper spacing */
+            height: 250px; /* Ensure enough height for proper spacing */
             width: 100%;
             display: flex;
             flex-direction: column; 
@@ -175,8 +175,13 @@
             font-weight: 500;
             margin-bottom: 2px;
         }
-        .location-table, input{
+        .location-table {
+            border: 1px solid;
+            width: 50%
+        }
+        .location-table, input, label{
             font-weight: bold;
+            width: 6rem;
         }
         .location-table td {
             padding: 0 2px;
@@ -191,6 +196,21 @@
             left: 50%; /* Move to the horizontal center */
             transform: translateX(-50%); /* Adjust for centering */
         }
+        .date {
+            width: 80%; /* Set parent width */
+            margin: 0 auto; /* Center the parent */
+        }
+        .date input {
+            width: 100%; /* Input takes full width of parent */
+        }
+        .time {
+            width: 80%; /* Set parent width */
+            margin: 0 auto; /* Center the parent */
+        }
+        .time input {
+            width: 100%; /* Input takes full width of parent */
+        }
+
     </style>
 </head>
 <body>
@@ -215,7 +235,7 @@
 
                     <label class="lblCurLoca">Current Location</label>
 
-                    <table style="width:100%" class="location-table">
+                    <table class="location-table">
                         <tr>
                             <td><lable>Latitude</lable></td>
                             <td><input type="text" id="curLat" readonly></td>
