@@ -23,21 +23,17 @@
         .top-container {
             display: flex;
             justify-content: space-between;
- /*           flex-wrap: wrap; /* Enable wrapping for smaller screens */
             gap: 5px; /* Add spacing between containers */
         }
 
         .left-container {
-/*            flex: 1 1 50%;*/
             border: 1px solid black;
             padding: 5px;
- /*           min-width: 100px;*/
             width: 100%;
             height: 250px;
         }
 
         .right-container {
-/*            flex: 1 1 50%;*/
             border: 1px solid black;
             padding: 1px;
             position: relative; /* Required for absolute positioning */
@@ -46,7 +42,6 @@
             display: flex;
             flex-direction: column; 
             align-items: center;
-/*            min-width: 150px;*/
         }
 
         .image img {
@@ -54,7 +49,6 @@
             max-height: 180px;
             object-fit: fill;
             border: 1px solid black;
-            
         }
 
         #curDate, #curTime {
@@ -218,6 +212,7 @@
         <h3> Attendance Entry </h3>
         <h5> <%= empName %> </h5>
         <h5> <%= location %> </h5>
+        <%= empId %>
         <form class = "attendance-submit-form">
             <div class="top-container">
                 <div class="left-container">
@@ -403,6 +398,63 @@
             // Hide the video and show the canvas with the captured image
             video.style.display = 'none';
             canvas.style.display = 'block';
+        });
+        // Adding Click Event Listner to Submit Button and Saving The Form Data 
+        // To the Server 
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.addEventListener('click', async () => {
+            const formData = new FormData();
+            formData.append('date', document.getElementById('curDate').value);
+            formData.append('time', document.getElementById('curTime').value);
+            formData.append('empid', '<%= empId %>');
+            formData.append('latitude', document.getElementById('curLat').value);
+            formData.append('longitude', document.getElementById('curLong').value);
+            formData.append('location_id', '<%= otherData[0].location_id %>');
+
+            // Add the photo if captured
+            const canvas = document.getElementById('canvas');
+            canvas.toBlob((blob) => {
+                formData.append('photo', blob);
+
+                try {
+                    const response = fetch('/submit-attendance', {
+                        method: 'POST',
+                        body: formData,
+                    });
+alert(response);
+                if (response.redirected) {
+                    // Follow the redirect
+                    window.location.href = response.url;
+                } else {
+                    const result =  response.json();
+                    if (result.error) {
+                        alert(result.error);
+                    }
+                }
+                } catch (error) {
+                    console.error('Error submitting attendance:', error);
+                    alert('Failed to submit attendance.');
+                }           
+            });
+
+                // Send the form data to the server
+                // fetch('/submit-attendance', {
+                //     method: 'POST',
+                //     body: formData,
+                // })
+                //     .then((response) => response.json())
+                //     .then((data) => {
+                //         if (data.error) {
+                //             alert(data.error);
+                //         } else {
+                //             alert(data.message);
+                //         }
+                //     })
+                //     .catch((error) => {
+                //         console.error('Error submitting attendance:', error);
+                //         alert('Failed to submit attendance.');
+                //     });
+//            });
         });
 
      </script>

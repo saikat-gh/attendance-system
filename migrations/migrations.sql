@@ -63,3 +63,5 @@
 -- ALTER TABLE public.location_master ADD lat varchar NULL;
 -- ALTER TABLE public.location_master ADD long varchar NULL;
 -- ALTER TABLE public.attendance ADD fotourl varchar NULL;
+-- ALTER TABLE public.attendance DROP COLUMN "valid";
+-- ALTER TABLE public.attendance ADD "inout" varchar NULL;

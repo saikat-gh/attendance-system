@@ -148,6 +148,72 @@ router.get('/attendance-capture', async (req, res) => {
 }
 });
 
+// Route to save Attendance Data
+router.post('/submit-attendance', upload.single('photo'), async (req, res) => {
+  try {
+      const { date, time, empid, latitude, longitude, location_id } = req.body;
+      const photoUrl = req.file ? `/uploads/${req.file.filename}` : null;
+
+      // Get the location coordinates from location_master
+      const locationQuery = 'SELECT lat, long FROM location_master WHERE id = $1';
+      const locationResult = await pool.query(locationQuery, [location_id]);
+
+      if (locationResult.rows.length === 0) {
+          return res.status(400).json({ error: 'Invalid location ID' });
+      }
+
+      const knownLocation = {
+          latitude: parseFloat(locationResult.rows[0].lat),
+          longitude: parseFloat(locationResult.rows[0].long),
+      };
+
+      const userLocation = { latitude: parseFloat(latitude), longitude: parseFloat(longitude) };
+
+      // Check if the user is within 5 meters
+      const distance = geolib.getDistance(userLocation, knownLocation);
+
+      if (distance > 5) {
+          return res.status(400).json({ error: 'You are not within the required radius' });
+      }
+
+      // Check the count of attendance records for the same empid and date
+      const countQuery = `
+      SELECT COUNT(*) as count 
+      FROM attendance 
+      WHERE empid = $1 AND date = $2
+      `;
+      const countResult = await pool.query(countQuery, [empid, date]);
+      const count = parseInt(countResult.rows[0].count, 10);
+
+      // Determine the value of `inout` field
+      const inout = (count % 2 === 0) ? 'IN' : 'OUT';
+
+      // Save attendance data
+      const insertQuery = `
+          INSERT INTO attendance (date, time, empid, lat, long, location_id, fotourl, inout)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `;
+
+      await pool.query(insertQuery, [date, time, empid, latitude, longitude, location_id, photoUrl, inout]);
+
+      // Redirect if the request expects a redirect
+        if (req.headers.accept.includes('text/html')) {
+            return res.redirect(`/attendance/${location_id}`);
+        }
+
+        // Send JSON response if requested via JavaScript
+        res.json({ success: true, redirectUrl: `/attendance/${location_id}` });
+
+      // Redirect to /attendance/:key with the location_id
+      //res.redirect(`/attendance/${location_id}`);
+      //res.status(200).json({ message: 'Message from backend - Attendance submitted successfully' });
+
+  } catch (error) {
+      console.error('Error saving attendance:', error);
+      res.status(500).json({ error: 'Message from backend - An error occurred while saving attendance' });
+  }
+});
+
 // Route to fetch latitude and longitude for a location_id
 router.get('/get-location/:id', async (req, res) => {
   const locationId = req.params.id;
@@ -474,5 +540,55 @@ router.get("/users", async (req, res) => {
     client.release();
   }
 })
+
+router.get("/rptDatewiseAttendance" , (req, res) => {
+  res.render("rpt-datewise-attendance",{ glbUserType, glbUserName, glbLocaName });
+});
+router.get('/generate-report', async (req, res) => {
+  const { startDate, endDate } = req.query;
+
+  if (!startDate || !endDate) {
+      return res.status(400).json({ success: false, message: 'Invalid date range.' });
+  }
+
+  const query = `
+      SELECT 
+          a.date,
+          CONCAT(e.fname, ' ', e.lname) AS name,
+          a.fotourl,
+          MIN(CASE WHEN a.inout = 'IN' THEN a.time END) AS inTime,
+          MAX(CASE WHEN a.inout = 'OUT' THEN a.time END) AS outTime
+      FROM 
+          attendance a
+      INNER JOIN 
+          employee_master e 
+      ON 
+          a.empid = e.id
+      WHERE 
+          a.date BETWEEN $1 AND $2
+      GROUP BY 
+          a.date, a.empid, e.fname, e.lname, a.fotourl
+      ORDER BY 
+          a.date, e.fname, e.lname;
+  `;
+
+  const client = await pool.connect();
+  try {
+      const result = await client.query(query, [startDate, endDate]);
+      const report = result.rows.map(row => ({
+          date: row.date,
+          name: row.name,
+          fotourl: row.fotourl || '/path/to/default/image.jpg', // Fallback for missing images
+          inTime: row.intime || 'N/A',
+          outTime: row.outtime || 'N/A',
+      }));
+      res.json({ success: true, report });
+  } catch (error) {
+      console.error('Error generating report:', error);
+      res.status(500).json({ success: false, message: 'Error generating report.' });
+  } finally {
+      client.release();
+  }
+});
 
 module.exports = router;
