@@ -151,6 +151,7 @@ router.get('/attendance-capture', async (req, res) => {
 // Route to save Attendance Data
 router.post('/submit-attendance', upload.single('photo'), async (req, res) => {
   try {
+    console.log("test")
       const { date, time, empid, latitude, longitude, location_id } = req.body;
       const photoUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
