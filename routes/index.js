@@ -3,8 +3,9 @@ var router = express.Router();
 const multer = require('multer')
 const path = require('path');
 const geolib = require('geolib');
-
+require("dotenv").config();
 const { Pool } = require('pg');
+
 
 // PostgreSQL connection configuration
 const pool = new Pool({
@@ -22,7 +23,7 @@ const storage = multer.diskStorage({
       cb(null, 'uploads/'); // Save images in the 'uploads' folder
   },
   filename: function (req, file, cb) {
-      cb(null, Date.now() + path.extname(file.originalname)); // Unique file names
+      cb(null, Date.now() + path.extname(file.originalname)+".jpg"); // Unique file names
   }
 });
 
@@ -151,15 +152,16 @@ router.get('/attendance-capture', async (req, res) => {
 // Route to save Attendance Data
 router.post('/submit-attendance', upload.single('photo'), async (req, res) => {
   try {
-    console.log("test")
+      console.log(`Inside Submit attendance`) 
       const { date, time, empid, latitude, longitude, location_id } = req.body;
-      const photoUrl = req.file ? `/uploads/${req.file.filename}` : null;
-
+      const photoUrl = req.file ? `/uploads/${req.file.filename}`+ 'jpg' : null;
+      console.log(`Photo url prepared`)
       // Get the location coordinates from location_master
       const locationQuery = 'SELECT lat, long FROM location_master WHERE id = $1';
       const locationResult = await pool.query(locationQuery, [location_id]);
-
+      console.log(`Location fetched`)
       if (locationResult.rows.length === 0) {
+          console.log(`No location found ....returning error`)
           return res.status(400).json({ error: 'Invalid location ID' });
       }
 
@@ -172,10 +174,18 @@ router.post('/submit-attendance', upload.single('photo'), async (req, res) => {
 
       // Check if the user is within 5 meters
       const distance = geolib.getDistance(userLocation, knownLocation);
-
+      console.log(`Distance from base location calculated: ${distance}`)
       if (distance > 5) {
+          console.log(`Distance not within range`)
           return res.status(400).json({ error: 'You are not within the required radius' });
       }
+
+      // code for image comparison
+      // const frame = cv.imread('photoUrl'); 
+      // const referenceImage = cv.imread('/uploads/test.jpg')
+      const { compareFacesPython } = require('../face-comparison/faceComparisonPython');
+      let similarityScore = await compareFacesPython(photoUrl, '/uploads/test.jpg');
+      console.log(`Similarity score : ${similarityScore}`);
 
       // Check the count of attendance records for the same empid and date
       const countQuery = `
@@ -185,8 +195,9 @@ router.post('/submit-attendance', upload.single('photo'), async (req, res) => {
       `;
       const countResult = await pool.query(countQuery, [empid, date]);
       const count = parseInt(countResult.rows[0].count, 10);
+      console.log(`Attendance counnt fetched from database`)
 
-      // Determine the value of `inout` field
+      // Determine the value of inout field
       const inout = (count % 2 === 0) ? 'IN' : 'OUT';
 
       // Save attendance data
@@ -196,7 +207,7 @@ router.post('/submit-attendance', upload.single('photo'), async (req, res) => {
       `;
 
       await pool.query(insertQuery, [date, time, empid, latitude, longitude, location_id, photoUrl, inout]);
-
+      console.log(`Attendance saved to database`)
       // Redirect if the request expects a redirect
         if (req.headers.accept.includes('text/html')) {
             return res.redirect(`/attendance/${location_id}`);
@@ -206,7 +217,7 @@ router.post('/submit-attendance', upload.single('photo'), async (req, res) => {
         res.json({ success: true, redirectUrl: `/attendance/${location_id}` });
 
       // Redirect to /attendance/:key with the location_id
-      //res.redirect(`/attendance/${location_id}`);
+      //res.redirect(/attendance/${location_id});
       //res.status(200).json({ message: 'Message from backend - Attendance submitted successfully' });
 
   } catch (error) {
@@ -214,7 +225,6 @@ router.post('/submit-attendance', upload.single('photo'), async (req, res) => {
       res.status(500).json({ error: 'Message from backend - An error occurred while saving attendance' });
   }
 });
-
 // Route to fetch latitude and longitude for a location_id
 router.get('/get-location/:id', async (req, res) => {
   const locationId = req.params.id;
