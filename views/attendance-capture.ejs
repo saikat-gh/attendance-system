@@ -467,7 +467,7 @@
                 method: 'POST',
                 body: formData
             });
-            
+            console.log(`Response from compare-face api : `);
             const result = await response.json();
             
             if (result.match) {
