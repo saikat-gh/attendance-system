@@ -1,0 +1,86 @@
+<head>
+    <style>
+        .report-container {
+            margin-top: 20px;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .report-table th, .report-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .report-table th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+
+        .employee-name {
+            display: flex;
+            align-items: center;
+            justify-content: start;
+            gap: 10px;
+        }
+
+        .employee-name img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <h3>Attendance Report for Location <%= glbLocaName %></h3>
+        <h4>From Date <%= startDate %>  To Date <%= endDate %> </h4>
+        <div class="report-area" id="report-area">
+<!--  Want to print the report here -->
+        </div>
+    </div>
+
+    <script>
+        // Report data from server-side
+        const report = <%- JSON.stringify(report) %>;
+        
+        function renderReport(report) {
+            const container = document.getElementById('report-area');
+            container.innerHTML = `
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Employee Name</th>
+                            <th>In Time</th>
+                            <th>Out Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${report.map(row => `
+                            <tr>
+                                <td>${row.date}</td>
+                                <td class="employee-name">
+                                    <img src="${row.fotourl}" alt="${row.name}">
+                                    ${row.name}
+                                </td>
+                                <td>${row.inTime}</td>
+                                <td>${row.outTime}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        // Render the report on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderReport(report);
+        });
+    </script>
+</body>

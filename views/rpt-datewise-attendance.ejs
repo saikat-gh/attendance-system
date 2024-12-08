@@ -1,0 +1,182 @@
+<%- include('menu'); %>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datewise Attendance Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .form-container{
+            height: 330px;
+            width: 600px;
+            background-color: rgb(239, 211, 234);
+            position: absolute;
+            transform: translate(-50%,-50%);
+            top: 50%;
+            left: 50%;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.1);
+            box-shadow: 0 0 40px rgba(8,7,16,0.6);
+            padding: 20px 35px;
+        }
+
+        .form-container  > h3 {
+            background-color: rgb(74, 74, 74);
+            text-align: center;
+            text-shadow: 0 3px rgb(17, 1, 1);
+            font-size: 2.0 rem;
+            font-weight: bold;
+            color: rgb(241, 193, 233);
+            padding-bottom: 4px;
+        }
+
+        .tbl-date-report {
+            border: 1px solid;
+            border-collapse: collapse;
+            background-color: rgb(201, 236, 78);
+            margin-top: 20px;
+            margin-bottom: 2px;
+            border-spacing: 20px;
+            width: 100%;
+        }
+
+        .tbl-date-report td {
+            text-align: center;
+        }
+
+        .form-container input {
+            padding: 5px;
+            margin: 5px;
+            width: 200px;
+        }
+
+        .form-container button {
+            padding: 8px 16px;
+            margin: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .report-container {
+            margin-top: 20px;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .report-table th, .report-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .report-table th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+
+        .employee-name {
+            display: flex;
+            align-items: center;
+            justify-content: start;
+            gap: 10px;
+        }
+
+        .employee-name img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h3>Generate Attendance Report</h3>
+        <form id="report-form">
+            <table class="tbl-date-report">
+                <tr>
+                    <td><label for="startDate">Start Date:</label></td>
+                    <td><input type="date" id="startDate" name="startDate" required></td>
+                </tr>
+                <tr>
+                    <td><label for="endDate">End Date:</label></td>
+                    <td><input type="date" id="endDate" name="endDate" required></td>
+                </tr>
+                <tr>
+                    <td><button type="button" onclick="generateReport()">Generate Report</button></td>
+                    <td><button type="button" onclick="closeForm()">Close</button></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+
+    <div class="report-container" id="report-container">
+        <!-- Report will be dynamically inserted here -->
+    </div>
+
+    <script>
+        function closeForm() {
+            document.getElementById('report-form').reset();
+            document.getElementById('report-container').innerHTML = '';
+        }
+
+        function generateReport() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!startDate || !endDate) {
+                alert('Please select both start and end dates.');
+                return;
+            }
+            window.location.href = `/generate-report?startDate=${startDate}&endDate=${endDate}`;
+            // fetch(`/generate-report?startDate=${startDate}&endDate=${endDate}`)
+            //     .then(response => response.json())
+            //     .then(data => {
+            //         if (data.success) {
+            //             renderReport(data.report);
+            //         } else {
+            //             alert('Failed to fetch the report.');
+            //         }
+            //     })
+            //     .catch(err => console.error('Error fetching the report:', err));
+        }
+
+        function renderReport(report) {
+            const container = document.getElementById('report-container');
+            container.innerHTML = `
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Employee Name</th>
+                            <th>In Time</th>
+                            <th>Out Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${report.map(row => `
+                            <tr>
+                                <td>${row.date}</td>
+                                <td class="employee-name">
+                                    <img src="${row.fotourl}" alt="${row.name}">
+                                    ${row.name}
+                                </td>
+                                <td>${row.inTime}</td>
+                                <td>${row.outTime}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+    </script>
+</body>
+

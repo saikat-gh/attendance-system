@@ -1,0 +1,190 @@
+<%- include('menu'); %>
+<body>
+    <div class="emp-add-container">
+        <header> Employee Details </header>
+        <form autocomplete="off" class="emp-add-form" method="POST" action="/employee-add" enctype="multipart/form-data">
+            <div class="emp-add-input">
+                <div class="emp-entry-fields">
+                    <table style="width:100%" class="emp-add-table">
+                        <tr>
+                            <td><label for = "location">Location</label></td>
+                            <td>
+                                <select class="userselect" id="location_name" name="location_name" required>
+                                    <% locations.forEach(function(location) { %>
+                                      <option value="<%= location.location_name %>"><%= location.location_name %></option>
+                                    <% }); %>
+                                </select>                      
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><lable for ="fname">First Name</lable></td>
+                            <td><input type="text" id="fname" name="fname" placeholder="Enter your First Name" required></td>
+                        </tr>
+                        <tr>
+                            <td><lable for ="lname">Last Name</lable></td>
+                            <td><input type="text" id="lname" name="lname" placeholder="Enter your Last Name" required></td>
+                        </tr>
+                        <tr>
+                            <td><lable for ="addr1">Address Line 1</lable></td>
+                            <td><input type="text" id="addr1" name="addr1" placeholder="Enter Address Line 1" required></td>
+                        </tr>
+                        <tr>
+                            <td><lable for ="addr2">Address Line 2</lable></td>
+                            <td><input type="text" id="addr2" name="addr2" placeholder="Enter Address Line 2" required></td>
+                        </tr>
+                        <tr>
+                            <td><lable for ="city">City</lable></td>
+                            <td><input type="text" id="city" name="city" placeholder="Enter your City" required></td>
+                        </tr>
+                        <tr>
+                            <td><lable for ="state">State</lable></td>
+                            <td><input type="text" id="state" name="state" placeholder="Enter your State" required></td>
+                        </tr>
+                        <tr>
+                            <td><lable for ="pincode">Pin Code</lable></td>
+                            <td><input type="text" id="pincode" name="pincode" placeholder="Enter your Pin Code" required></td>
+                        </tr>
+                        <tr>
+                            <td><lable for ="mobile">Mobile No</lable></td>
+                            <td><input type="text" id="mobile" name="mobile" placeholder="Enter your Mobile Number" required></td>
+                        </tr>
+                        <tr>
+                            <td><lable for ="email">Email</lable></td>
+                            <td><input type="text" id="email" name="email" placeholder="Enter your E-mail" required></td>
+                        </tr>
+                        <tr>
+                            <td><lable for ="esino">ESI Number</lable></td>
+                            <td><input type="text" id="esino" name="esino" placeholder="Enter ESI Number" required></td>
+                        </tr>
+                        <tr>
+                            <td><lable for ="uanno">UAN Number</lable></td>
+                            <td><input type="text" id="uanno" name="uanno" placeholder="Enter UAN number" required></td>
+                        </tr>
+
+                    </table>
+                </div>
+                
+                <div class="image-entry">
+                    <div class="image-box" id="image-box"></div>
+                    <input type="file" id="image" name="image" accept="image/*">
+                    <div class="camera-container">
+                        <video id="video" autoplay playsinline></video>
+                        <div class="camera-btn-grp">
+                            <button id="start-btn" name="start-btn" type="button">Start Camera</button>
+                            <button id="capture-btn" name="capture-btn" type="button">Capture Photo</button>
+                        </div>       
+                        <canvas id="canvas" style="display: none;"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="btnGroup">
+                <button class="btnSubmit" type="submit">Submit</button></a>
+                <button class="btnReset" type="reset">Reset Data</button>
+                <a href="/employee"><button class="btnReturn" type="button">Return</button></a>
+            </div>
+        </form>
+    </div>
+    <script>
+        // Displaying Selected Image From Disk
+        const imageInput = document.getElementById('image');
+        const imageBox = document.getElementById('image-box');
+    
+        imageInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            console.log(file)
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    console.log(e.target.result);
+                    imageBox.style.backgroundImage = `url(${e.target.result})`;
+                    imageBox.style.backgroundSize = 'cover';
+                    imageBox.style.backgroundPosition = 'center';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+<script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const captureBtn = document.getElementById('capture-btn');
+    const startBtn = document.getElementById('start-btn');
+    const imageBx = document.getElementById('image-box'); // Where the captured image will be displayed
+    let capturedBlob = null; // To store the captured image blob
+
+    // Request access to the camera
+    async function startCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+        } catch (error) {
+            console.error('Error accessing the camera: ', error);
+        }
+    }
+
+    startBtn.addEventListener('click', (event) => {
+        event.preventDefault(); // Prevent form submission
+        startCamera();
+    });
+
+    // Capture the image and display it in the image-box
+    captureBtn.addEventListener('click', (event) => {
+        event.preventDefault(); // Prevent form submission
+
+        // Draw the current frame of the video onto the canvas
+        const context = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Convert canvas to Blob (binary large object)
+        canvas.toBlob((blob) => {
+            capturedBlob = blob; // Save the captured blob for form submission
+
+            // Create an object URL and display it in the image-box
+            const imageUrl = URL.createObjectURL(blob);
+            imageBox.style.backgroundImage = `url(${imageUrl})`;
+            imageBox.style.backgroundSize = 'cover';
+            imageBox.style.backgroundPosition = 'center';
+
+            // Optional: Stop the camera stream after capturing
+            const stream = video.srcObject;
+            const tracks = stream.getTracks();
+            tracks.forEach(track => track.stop());
+
+            // Hide the video and show the image box
+            // video.style.display = 'none';
+        }, 'image/png'); // Specify the format as PNG
+    });
+
+    // Handle form submission with the captured image and form data
+    document.querySelector('.emp-add-form').addEventListener('submit', async (event) => {
+        event.preventDefault(); // Prevent default form submission
+
+        // Create a new FormData object to send form data and the captured image
+        const formData = new FormData(event.target); // Automatically gather form inputs (fname, lname, etc.)
+        if (capturedBlob) {
+            formData.append('image', capturedBlob, 'photo.png'); // Append the captured image Blob with a filename
+        }
+
+        // Send the form data and the captured image to the backend via fetch
+        try {
+            const response = await fetch('/employee-add', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (response.ok) {
+                console.log('Data and image uploaded successfully');
+                // Optional: Redirect or show a success message
+                res.render('employee-add', { glbUserName, glbLocaName, glbLocaCode });
+            } else {
+                console.error('Upload failed');
+            }
+        } catch (error) {
+            console.error('Error during upload:', error);
+        }
+    });
+</script>
+</body>
+</html>

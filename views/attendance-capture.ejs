@@ -1,0 +1,469 @@
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .attendance-capture-form-container {
+            background-color: rgb(241, 241, 207);
+            border: 1px solid brown;
+            max-width: 100%; /* Allow full width for small screens */
+            margin: 0 auto;
+            padding: 10px; /* Add padding for better mobile spacing */
+        }
+
+        h3, h5 {
+            text-align: center;
+            margin: 5px 0;
+        }
+
+        .top-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 5px; /* Add spacing between containers */
+        }
+
+        .left-container {
+            border: 1px solid black;
+            padding: 5px;
+            width: 100%;
+            height: 250px;
+        }
+
+        .right-container {
+            border: 1px solid black;
+            padding: 1px;
+            position: relative; /* Required for absolute positioning */
+            height: 250px; /* Ensure enough height for proper spacing */
+            width: 100%;
+            display: flex;
+            flex-direction: column; 
+            align-items: center;
+        }
+
+        .image img {
+            width: 100%; 
+            max-height: 180px;
+            object-fit: fill;
+            border: 1px solid black;
+        }
+
+        #curDate, #curTime {
+            font-size: 18px; /* Adjust font size for mobile */
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .mid-container {
+            width: 100%;
+            margin-top: 10px;
+            border: 1px solid black;
+            padding: 5px;
+            text-align: center;
+        }
+
+        .bottom-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            padding: 10px;
+        }
+
+        #video {
+            width: 100%; /* Make video responsive */
+            max-height: 200px; /* Limit height */
+            object-fit: cover;
+            border: 1px solid black;
+            box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.3);
+        }
+        #canvas {
+            display: none; /* Initially hidden */
+            width: 100%; /* Match video width */
+            max-height: 200px; /* Match video height */
+            object-fit: cover; /* Preserve aspect ratio */
+            border: 1px solid black; /* Match video border */
+            box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.3); /* Match video shadow */
+        }
+        .camera-btn-grp, .btn-grp {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            flex: 1 1 45%; /* Make buttons responsive */
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        #start-btn {
+            background-color: springgreen;
+        }
+
+        #capture-btn {
+            background-color: #4070f4;
+            color: white;
+        }
+
+        #submit-btn {
+            background-color: green;
+            color: white;
+        }
+
+        #cancel-btn {
+            background-color: red;
+            color: white;
+        }
+
+        @media (max-width: 480px) {
+            h3, h5 {
+                font-size: 16px;
+            }
+
+            button {
+                font-size: 12px;
+            }
+
+            #curDate, #clock {
+                font-size: 16px;
+            }
+        }
+
+        /* @media (max-width: 480px) {
+            .top-container {
+                flex-wrap: nowrap; 
+            }
+            .left-container, .right-container {
+                flex: 1 1 50%; 
+            }
+            .image img {
+                max-height: 100px; 
+            }
+        } */
+        .date {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .time {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }        
+        .lblCurLoca {
+            text-align: center;
+            width: 100%; 
+            margin-top: 10px;
+            font-style: oblique;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        .location-table {
+            border: 1px solid;
+            width: 50%
+        }
+        .location-table, input, label{
+            font-weight: bold;
+            width: 6rem;
+        }
+        .location-table td {
+            padding: 0 2px;
+        }
+        .locaUpdt-btn {
+            background-color: aquamarine;
+            border-radius: 5px;
+            border: none;
+            padding: 5px 20px;
+            position: absolute;
+            bottom: 5px; /* Stick to the bottom */
+            left: 50%; /* Move to the horizontal center */
+            transform: translateX(-50%); /* Adjust for centering */
+        }
+        .date {
+            width: 80%; /* Set parent width */
+            margin: 0 auto; /* Center the parent */
+        }
+        .date input {
+            width: 100%; /* Input takes full width of parent */
+        }
+        .time {
+            width: 80%; /* Set parent width */
+            margin: 0 auto; /* Center the parent */
+        }
+        .time input {
+            width: 100%; /* Input takes full width of parent */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="attendance-capture-form-container">
+        <h3> Attendance Entry </h3>
+        <h5> <%= empName %> </h5>
+        <h5> <%= location %> </h5>
+        <%= empId %>
+        <form class = "attendance-submit-form">
+            <div class="top-container">
+                <div class="left-container">
+                    <div class="image">
+                        <img src="<%= otherData[0].fotourl %>" alt="Italian Trulli">
+                    </div>
+                </div>
+                <div class="right-container">
+                    <div class="date">
+                         <input type="text" id="curDate" readonly>
+                    </div>
+                    <div class="time">
+                        <input type="text" id="curTime" readonly>
+                    </div>
+
+                    <label class="lblCurLoca">Current Location</label>
+
+                    <table class="location-table">
+                        <tr>
+                            <td><lable>Latitude</lable></td>
+                            <td><input type="text" id="curLat" readonly></td>
+                        </tr>
+                        <tr>
+                            <td><lable>Longitude</lable></td>
+                            <td><input type="text" id="curLong" readonly></td>
+                        </tr>
+                    </table>
+                    <button class="locaUpdt-btn" type="button" onclick="displayLocation()">Update Location</button>
+                </div>
+            </div>
+            <div class="mid-container">
+                &nbsp;
+            </div>
+            <div class="bottom-container">
+                <div class="camera-container">
+                    <video id="video" autoplay playsinline></video>
+                    <div class="camera-btn-grp">
+                        <button id="start-btn" name="start-btn" type="button">Start Camera</button>
+                        <button id="capture-btn" name="capture-btn" type="button">Capture Photo</button>
+                    </div>       
+                    <canvas id="canvas" style="display: none;"></canvas>
+                </div>
+                <div class="btn-grp">
+                    <button id="submit-btn" name="submit-btn" type="button">Submit</button>           
+                    <button id="cancel-btn" name="cancel-btn" type="button">Cancel</button>           
+                </div>
+            </div>
+        </form>
+    </div>
+    <script>
+        
+        // Get the current date
+        const currentDate = new Date();
+
+        // Helper function to format the date
+        function formatDate(date) {
+            const day = String(date.getDate()).padStart(2, '0'); // Get day (2 digits)
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const month = monthNames[date.getMonth()]; // Get month name
+            const year = date.getFullYear(); // Get year
+            return `${day}-${month}-${year}`; // Return formatted date
+        }
+
+        // Format the current date
+        const formattedDate = formatDate(currentDate);
+
+        // Display the date in the input field
+        document.getElementById('curDate').value = formattedDate;
+
+        // Function to format and display the time
+        function displayTime() {
+            const now = new Date();
+
+            // Extract hours, minutes, and seconds
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            // Format the time as HH:MM:SS
+            const timeString = `${hours}:${minutes}:${seconds}`;
+
+            // Display the time in the clock div
+            document.getElementById('curTime').value = timeString;
+        }
+
+        // Initial display
+        displayTime();
+
+        // Update the time every second
+        setInterval(displayTime, 1000);        
+
+        function displayLocation(event) {
+            const knownLocation = { latitude: <%= otherData[0].lat %>, longitude: <%= otherData[0].long %> };
+            const midContainer = document.querySelector('.mid-container'); // Get the element
+
+            if (navigator.geolocation) {
+                // Get the current position
+                navigator.geolocation.getCurrentPosition((position) => {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+                        const userLocation = {
+                                                latitude: position.coords.latitude,
+                                                longitude: position.coords.longitude
+                                            };
+                        document.getElementById('curLat').value = latitude;
+                        document.getElementById('curLong').value = longitude;
+                        // Check if the user is within a 5 km radius
+                        // const radius = 5.000; // Radius in meters
+                        // const withinRadius = isPointWithinRadius(userLocation, knownLocation, radius);
+                        // if (withinRadius) {
+                        //     midContainer.textContent = "You are within the desired radius";
+                        // } else {
+                        //     midContainer.textContent = "You are out of reach";
+                        // }
+                    },
+                    (error) => {
+                        // Handle errors
+                        switch (error.code) {
+                            case error.PERMISSION_DENIED:
+                                midContainer.textContent = "User denied the request for Geolocation.";
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                midContainer.textContent = "Location information is unavailable.";
+                                break;
+                            case error.TIMEOUT:
+                                midContainer.textContent = "The request to get user location timed out.";
+                                break;
+                            default:
+                                midContainer.textContent = "An unknown error occurred.";
+                                break;
+                        }
+                        console.error('Error fetching location:', error);
+                    }
+                );
+            } else {
+                midContainer.textContent = "Geolocation is not supported by this browser.";
+            }
+        }
+
+        displayLocation();
+
+        // Update the location every second
+//        setInterval(displayLocation, 1000);        
+
+        const video = document.getElementById('video'); // The video element
+        const canvas = document.getElementById('canvas'); // The canvas element
+        const startBtn = document.getElementById('start-btn'); // Start camera button
+        const captureBtn = document.getElementById('capture-btn'); // Capture photo button
+
+        let stream = null; // Variable to hold the video stream
+
+        // 1. Start Camera
+        startBtn.addEventListener('click', async () => {
+        try {
+            // Request camera access
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream; // Set the video feed
+            video.play(); // Start the video playback
+            video.style.display = 'block'; // Ensure the video is visible
+            canvas.style.display = 'none'; // Hide the canvas
+        } catch (error) {
+            console.error('Error accessing the camera:', error);
+        }
+        });
+
+        // 2. Capture Photo
+        captureBtn.addEventListener('click', () => {
+            if (!stream) {
+                console.error('No video stream available!');
+                return;
+            }
+
+            // Draw the current frame from the video onto the canvas
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Stop the video stream
+            const tracks = stream.getTracks();
+            tracks.forEach((track) => track.stop());
+
+            // Hide the video and show the canvas with the captured image
+            video.style.display = 'none';
+            canvas.style.display = 'block';
+        });
+        // Adding Click Event Listner to Submit Button and Saving The Form Data 
+        // To the Server 
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.addEventListener('click', async () => {
+            const formData = new FormData();
+            formData.append('date', document.getElementById('curDate').value);
+            formData.append('time', document.getElementById('curTime').value);
+            formData.append('empid', '<%= empId %>');
+            formData.append('latitude', document.getElementById('curLat').value);
+            formData.append('longitude', document.getElementById('curLong').value);
+            formData.append('location_id', '<%= otherData[0].location_id %>');
+
+            // Add the photo if captured
+            const canvas = document.getElementById('canvas');
+            canvas.toBlob((blob) => {
+                formData.append('photo', blob);
+
+                try {
+                    console.log(`Attendance submit api `);
+                    const response = fetch('/submit-attendance', {
+                        method: 'POST',
+                        body: formData,
+                    });
+                    response.then((data)=>{
+                        data.json().then((resp)=>{
+                            console.log("Received: ",resp)
+                             // Follow the redirect
+                             window.location.href = resp.redirectUrl;
+
+                        })
+                        // if (response.redirected) {
+                           
+                        // } else {
+                        //     console.log(`Attendance saved : `,response)
+                        //     if (result.error) {
+                        //         alert(result.error);
+                        //     }
+                        // }
+                    })   
+               
+                } catch (error) {
+                    console.error('Error submitting attendance:', error);
+                    alert('Failed to submit attendance.');
+                }    
+            });
+
+                // Send the form data to the server
+                // fetch('/submit-attendance', {
+                //     method: 'POST',
+                //     body: formData,
+                // })
+                //     .then((response) => response.json())
+                //     .then((data) => {
+                //         if (data.error) {
+                //             alert(data.error);
+                //         } else {
+                //             alert(data.message);
+                //         }
+                //     })
+                //     .catch((error) => {
+                //         console.error('Error submitting attendance:', error);
+                //         alert('Failed to submit attendance.');
+                //     });
+//            });
+        });
+
+     </script>
+</body>

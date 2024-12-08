@@ -1,0 +1,98 @@
+<%- include('menu'); %>
+<head>
+    <style>
+        #btnLocation {
+            background-color: rgb(70, 63, 2);
+            color: wheat;
+            padding-left: 10px;
+            padding-right: 10px;
+            border: none;
+            border-radius: 5px;
+            margin-left: 125px;
+            margin-bottom: 10px;
+        }
+
+    </style>
+</head>
+<body class="location-add-body">
+    <script>
+    </script>
+
+    <div class="location-add-form-container">
+        <h3>Add New Location</h3>
+        <form class="form-location-add" method="post">
+            <table class="form-location-add-table">
+                <tr>
+                    <td><lable for ="location_name">Location Name</lable></td>
+                    <td><input type="text" id="location_name" name="location_name" required></td>
+                </tr>
+                <tr>
+                    <td><label for="address1">Address Line 1</label></td>
+                    <td><input type="text" id="address1" name="address1" required></td>
+                </tr>
+                <tr>
+                    <td><label for="address2">Address Line 2</label></td>
+                    <td><input type="text" id="address2" name="address2" required></td>
+                </tr>
+                <tr>
+                    <td><label for="address3">Address Line 3</label></td>
+                    <td><input type="text" id="address3" name="address3" required></td>
+                </tr>
+                <tr>
+                    <td><label for="abbr">Abbreviation</label></td>
+                    <td><input type="text" id="abbr" name="abbr" maxlength="10"></td>
+                </tr>
+                <tr>
+                    <td><label for="lat">Latitude</label></td>
+                    <td><input type="text" id="lat" name="lat" maxlength="10"></td>
+                </tr>
+                <tr>
+                    <td><label for="long">Longitude</label></td>
+                    <td><input type="text" id="long" name="long" maxlength="10"></td>
+                </tr>
+            </table>
+            <button id="btnLocation" type="button" onclick="getLocation(event)">Get Current Location Co-Ordinates</button></a>
+            <div class="btnGroup">
+              <button class="btnSubmit" onClick="saveLocation()">Submit</button></a>
+              <button class="btnReset" type="reset">Reset Data</button>
+              <a href="/location"><button class="btnReturn" type="button">Return</button></a>
+            </div>
+        </form>
+    </div>
+    <script>
+    function getLocation(event) {
+        event.preventDefault();
+        if (navigator.geolocation) {
+            // Get the current position
+            navigator.geolocation.getCurrentPosition((position) => {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    document.getElementById('lat').value = latitude;
+                    document.getElementById('long').value = longitude;
+                },
+                (error) => {
+                    // Handle errors
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+//                            midContainer.textContent = "User denied the request for Geolocation.";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+//                            midContainer.textContent = "Location information is unavailable.";
+                            break;
+                        case error.TIMEOUT:
+//                            midContainer.textContent = "The request to get user location timed out.";
+                            break;
+                        default:
+//                            midContainer.textContent = "An unknown error occurred.";
+                            break;
+                    }
+                    console.error('Error fetching location:', error);
+                }
+            );
+        } else {
+//            midContainer.textContent = "Geolocation is not supported by this browser.";
+        }
+    }
+    </script>
+
+</body>

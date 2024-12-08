@@ -1,0 +1,193 @@
+<%- include('menu'); %>
+<body>
+    <div class="emp-edit-container">
+        <header> Employee Details </header>
+        <form class="emp-edit-form" onsubmit="event.preventDefault()" enctype="multipart/form-data">
+            <div class="emp-edit-input">
+                <div class="emp-edit-fields">
+                    <table style="width:100%" class="emp-add-table">
+                        <tr>
+                            <td><label for = "location">Location</label></td>
+                            <td>
+                                <select class="userselect" id="location_name" name="location_name" required> 
+                                    <% locations.forEach(function(location) { %>
+                                      <option value="<%= location.location_name %>" 
+                                        <%= location.location_name === employees[0].location_name ? 'selected' : '' %>>
+                                        <%= location.location_name %>
+                                      </option>
+                                    <% }); %>
+                                  </select>                                                
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><lable for ="fname">First Name</lable></td>
+                            <td><input type="text" id="fname" name="fname" value = "<%= employees[0].fname %>" required></td>
+                        </tr>
+                        <tr>
+                            <td><lable for ="lname">Last Name</lable></td>
+                            <td><input type="text" id="lname" name="lname" value = "<%= employees[0].lname %>" required></td>
+                        </tr>
+                        <tr>
+                            <td><lable for ="addr1">Address Line 1</lable></td>
+                            <td><input type="text" id="addr1" name="addr1" value = "<%= employees[0].addr1 %>" required></td>
+                        </tr>
+                        <tr>
+                            <td><lable for ="addr2">Address Line 2</lable></td>
+                            <td><input type="text" id="addr2" name="addr2" value = "<%= employees[0].addr2 %>" required></td>
+                        </tr>
+                        <tr>
+                            <td><lable for ="city">City</lable></td>
+                            <td><input type="text" id="city" name="city" value = "<%= employees[0].city %>" required></td>
+                        </tr>
+                        <tr>
+                            <td><lable for ="state">State</lable></td>
+                            <td><input type="text" id="state" name="state" value = "<%= employees[0].state %>" required></td>
+                        </tr>
+                        <tr>
+                            <td><lable for ="pincode">Pin Code</lable></td>
+                            <td><input type="text" id="pincode" name="pincode" value = "<%= employees[0].pincode %>" required></td>
+                        </tr>
+                        <tr>
+                            <td><lable for ="mobile">Mobile No</lable></td>
+                            <td><input type="text" id="mobile" name="mobile" value = "<%= employees[0].mobile %>" required></td>
+                        </tr>
+                        <tr>
+                            <td><lable for ="email">Email</lable></td>
+                            <td><input type="text" id="email" name="email" value = "<%= employees[0].email %>" required></td>
+                        </tr>
+                        <tr>
+                            <td><lable for ="esino">ESI Number</lable></td>
+                            <td><input type="text" id="esino" name="esino" value = "<%= employees[0].esino %>" required></td>
+                        </tr>
+                        <tr>
+                            <td><lable for ="uanno">UAN Number</lable></td>
+                            <td><input type="text" id="uanno" name="uanno" value = "<%= employees[0].uanno %>" required></td>
+                        </tr>
+
+                    </table>
+                </div>
+                
+                <div class="image-entry">
+                    <div class="image-box" id="image-box">
+                        <img src="<%= employees[0].fotourl %>" alt="Italian Trulli">
+                    </div>
+                    <input type="file" id="image" name="image" accept="image/*">
+                    <div class="camera-container">
+                        <video id="video" autoplay playsinline></video>
+                        <div class="camera-btn-grp">
+                            <button id="start-btn" name="start-btn" type="button">Start Camera</button>
+                            <button id="capture-btn" name="capture-btn" type="button">Capture Photo</button>
+                        </div>       
+                        <canvas id="canvas" style="display: none;"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="btnGroup">
+                <button class="btnSubmit" type="button" onClick="updateEmployee(this.form, <%= employees[0].id %>)">Submit</button></a>
+                <button class="btnReset" type="reset">Reset Data</button>
+                <a href="/employee"><button class="btnReturn" type="button">Return</button></a>
+            </div>
+        </form>
+    </div>
+    <script>
+        // Displaying Selected Image From Disk
+        const imageInput = document.getElementById('image');
+        const imageBox = document.getElementById('image-box');
+    
+        imageInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            console.log(file)
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    console.log(e.target.result);
+                    imageBox.style.backgroundImage = 'none';
+                    imageBox.innerHTML = '';
+                    imageBox.style.backgroundImage = `url(${e.target.result})`;
+                    imageBox.style.backgroundSize = 'cover';
+                    imageBox.style.backgroundPosition = 'center';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+    <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const captureBtn = document.getElementById('capture-btn');
+    const startBtn = document.getElementById('start-btn');
+    const imageBx = document.getElementById('image-box'); // Where the captured image will be displayed
+    let capturedBlob = null; // To store the captured image blob
+
+    // Request access to the camera
+    async function startCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+        } catch (error) {
+            console.error('Error accessing the camera: ', error);
+        }
+    }
+
+    startBtn.addEventListener('click', (event) => {
+        event.preventDefault(); // Prevent form submission
+        startCamera();
+    });
+
+    // Capture the image and display it in the image-box
+    captureBtn.addEventListener('click', (event) => {
+        event.preventDefault(); // Prevent form submission
+
+        // Draw the current frame of the video onto the canvas
+        const context = canvas.getContext('2d');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Convert canvas to Blob (binary large object)
+        canvas.toBlob((blob) => {
+            capturedBlob = blob; // Save the captured blob for form submission
+
+            // Create an object URL and display it in the image-box
+            const imageUrl = URL.createObjectURL(blob);
+            imageBox.style.backgroundImage = `url(${imageUrl})`;
+            imageBox.style.backgroundSize = 'cover';
+            imageBox.style.backgroundPosition = 'center';
+
+            // Optional: Stop the camera stream after capturing
+            const stream = video.srcObject;
+            const tracks = stream.getTracks();
+            tracks.forEach(track => track.stop());
+
+            // Hide the video and show the image box
+            // video.style.display = 'none';
+        }, 'image/png'); // Specify the format as PNG
+    });
+
+    // Handle form submission with the captured image and form data
+    function updateEmployee(form,empId) {
+      // Create a new FormData object to send form data and the captured image
+        const formData = new FormData(form); // Automatically gather form inputs (fname, lname, etc.)
+        if (capturedBlob) {
+            formData.append('image', capturedBlob, 'photo.png'); // Append the captured image Blob with a filename
+        }
+        // Send the form data and the captured image to the backend via fetch
+        fetch(`/employee-update?id=${empId}`, {
+                method: 'PUT',
+                body: formData,
+            })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to Update Employee Data');
+            }
+            return response.text();
+        })
+        .then(message => {
+            console.log(message);
+            // Redirect on Success
+            window.location.href = "/employee";
+        })
+        .catch(error => console.error('Error Updating Employee Details:', error));
+    };
+</script>
+</body>

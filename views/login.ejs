@@ -1,0 +1,42 @@
+<head>
+	<style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-image: url("../images/water-drop.jpg");
+			background-image: url("../images/sand-01.jpg");
+            background-size: 100vw 100vh;
+            /* background-color: rgb(120, 117, 117);*/
+			/* background-blend-mode: lighten;*/
+        }
+    </style>
+	<link rel='stylesheet' href='/stylesheets/style_login.css' />
+</head>
+
+<body>
+
+	<form autocomplete="off" class="login_form" action="/login" method="POST">
+	
+	    <h3 class="heading">Login</h3>
+
+		<div class="user-logo">
+			<img src="../images/login.png" alt="" style="width:80px;height:80px;">	
+		</div>
+		
+		<label class="labeltxt" for="username"> Username: </label>
+		<select class="userselect" id="username" name="username" required>
+			<% users.forEach(function(user) { %>
+			  <option value="<%= user.username %>"><%= user.username %></option>
+			<% }); %>
+		  </select>
+
+		<label class="labeltxt" for="password"> Password: </label>
+		<input type="password" class="inputboxpassword" name="password" placeholder="Enter your Password" required>
+
+		<button class="btn_save" type="submit"> Submit </button>
+
+	</form>
+  
+</body>
+
+

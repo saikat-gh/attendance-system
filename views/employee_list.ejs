@@ -1,0 +1,113 @@
+<%- include('menu'); %>
+
+<body class="employee_body">
+    <script>
+        function homeClicked () {
+           window.location.href="/navbar";
+        }
+        function employeeAdd () {
+            let uType = "<%=glbUserType%>";
+            if (uType==="admin") {
+                window.location.href="/employee-add";
+            }
+        }
+
+        function deleteEmployee(empId) {
+        if (confirm("Are you sure you want to delete this Employee ?")) {
+            fetch(`/employee-delete?id=${empId}`, {
+                method: 'DELETE',
+            })
+            .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to delete Employee');
+            }
+                return response.text();
+            })
+            .then(message => {
+                alert(message);
+                // Remove the row from the table
+                const row = document.querySelector(`tr[data-key='${empId}']`);
+            if (row) {
+                row.parentNode.removeChild(row); // Removes the row from the DOM
+            } else {
+                console.error("Row not found in the table.");
+            }
+        })
+        .catch(error => console.error('Error deleting Employee:', error));
+        }
+        }
+
+        function filterTableFn() {
+        const searchValue = document.getElementById('searchFldFn').value.toLowerCase(); // Get search input value
+        const table = document.getElementById('employee_table'); // Get the table
+        const rows = table.getElementsByTagName('tr'); // Get all rows
+        // Loop through all table rows (except the header)
+        for (let i = 1; i < rows.length; i++) {
+            const firstName = rows[i].getElementsByTagName('td')[0]?.textContent.trim().toLowerCase() || ''; // Get location name
+            // Check if the first name starts with the search value
+            if (firstName.startsWith(searchValue)) {
+                rows[i].style.display = ''; // Show the row
+            } else {
+                rows[i].style.display = 'none'; // Hide the row
+            }
+        }   
+        }
+
+        function filterTableLn() {
+        const searchValue = document.getElementById('searchFldLn').value.toLowerCase(); // Get search input value
+        const table = document.getElementById('employee_table'); // Get the table
+        const rows = table.getElementsByTagName('tr'); // Get all rows
+        // Loop through all table rows (except the header)
+        for (let i = 1; i < rows.length; i++) {
+            const firstName = rows[i].getElementsByTagName('td')[1]?.textContent.trim().toLowerCase() || ''; // Get location name
+            // Check if the last name starts with the search value
+            if (firstName.startsWith(searchValue)) {
+                rows[i].style.display = ''; // Show the row
+            } else {
+                rows[i].style.display = 'none'; // Hide the row
+            }
+        }   
+        }
+</script>
+
+    <div class="employee_form_container"> 
+      <h3>E m p l o y e e s</h3>
+      <hr width="100%" color="yellow" size="5">
+      <div class="employee-form-top">
+        <div class="employee-form-top-left">
+            <input type="text" onkeyup="filterTableFn()" id="searchFldFn" name="searchFldFn" placeholder="Search Employee on First Name">
+            <input type="text" onkeyup="filterTableLn()" id="searchFldLn" name="searchFldLn" placeholder="Search Employee on Last Name">
+        </div>
+        <div class="employee-form-top-right">
+            <button id="addBtn" class="btnAdd" onclick="employeeAdd()"><i class="fa-solid fa-plus" style="background-color:rgb(94, 239, 94)"></i>&nbsp Add Employee</button>
+            <button class="btnHome" onClick="homeClicked()"> <img src="images/icons8-home-50.png">&nbspHome </button>
+        </div>  
+    </div>
+      <form class="employee_form">
+        <div class="employee_table_wrapper">
+            <table class="employee_table" id="employee_table">
+                <thead>
+                    <tr>
+                        <th width="30%">First Name</th>
+                        <th width="30%">Last Name</th>                        
+                        <th width="25%">Picture</th>
+                        <th width="15%">Actions</th>
+                    </tr>
+                </thead>
+                <% employees.forEach(employee => { %>
+                    <tr data-key = <%= employee.id %>>
+                        <td> <%= employee.fname %></td>
+                        <td><%= employee.lname %></td>                    
+                        <td><img src="<%= employee.fotourl %>" alt="" style="width: 30px; height: 30px; border-radius: 50%;"></td>
+                        <td><a class="editTag" href="/employee-edit?id=<%= employee.id %>">Edit</a>
+                            <button class="btnDelete" onClick="deleteEmployee(<%= employee.id %>)">Delete</button>
+                        </td>
+                    </tr>
+                <% }); %>
+            </table>
+        </div>
+      </form>
+  </div>
+</body>
+
+
