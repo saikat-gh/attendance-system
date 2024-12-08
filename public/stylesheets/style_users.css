@@ -169,7 +169,7 @@
 }
 
 .users-add-form-container{
-    height: 300px;
+    height: 330px;
     width: 600px;
     background-color: rgb(201, 236, 78);
     position: absolute;
@@ -206,11 +206,11 @@
     padding: 2px;
 }
 
-.form-users-add input {
-    width: 400px;
+.users-add-form-container input {
+    width: 23rem;   /*400px;*/
 }
 
-.form-users-add .btnSubmit {
+.users-add-form-container .btnSubmit {
     background-color: rgb(53, 238, 53);
     width: 150px;
     border: none;
@@ -220,11 +220,15 @@
     color: black;
 }
 
-.form-users-add .btnSubmit:hover {
+.users-add-form-container .btnSubmit:hover {
     background-color: rgb(93, 241, 93);
 }
 
-.form-users-add .btnReset {
+.users-add-form-container.btnSubmit:hover {
+    background-color: rgb(93, 241, 93);
+}
+
+.users-add-form-container .btnReset {
     background-color: rgb(160, 131, 1);
     width: 150px;
     border: none;
@@ -234,11 +238,11 @@
     color: black;
 }
 
-.form-users-add .btnReset:hover {
+.users-add-form-container .btnReset:hover {
     background-color: rgb(159, 139, 50);
 }
 
-.form-users-add .btnReturn {
+.users-add-form-container .btnReturn {
     background-color: rgb(23, 182, 235);
     width: 150px;
     border: none;
@@ -248,7 +252,7 @@
     color: black;
 }
 
-.form-users-add .btnReturn:hover {
+.users-add-form-container .btnReturn:hover {
     background-color: rgb(110, 203, 234);
 }
 
@@ -256,4 +260,18 @@
     display: flex;
     justify-content: center;
     gap: 6px;
+}
+
+.locationselect {
+    width: 23rem; 
+    height: 35px;
+    border: none;
+    border-radius: 5px;
+}
+
+.usertype {
+    width: 23rem;
+    height: 35px;
+    border: none;
+    border-radius: 5px;
 }

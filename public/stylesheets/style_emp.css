@@ -47,19 +47,24 @@
     .employee-form-top-left {
         display: flex;
         background-color: rgb(74,74,74);
-        width: 50%;
+        width: 60%;
         gap: 5px;
-     
     }
+
     .employee-form-top-right {
         display: flex;
-        width: 50%;
+        width: 40%;
         background-color: rgb(74, 74, 74);
         justify-content: flex-end;
         align-items: flex-end;
         gap: 5px;
     }
     
+    input {
+        border: none;
+        border-radius: 5px;
+    }
+
     .employee_form_container .btnAdd {
         background-color: rgb(94, 239, 94);
         width: 150px;
@@ -234,12 +239,10 @@ body{
 }
 
 /* For demonstration purposes, add border */
-/*
-.emp-add-table, td {
-    border: 2px solid black;
-    
+
+.emp-add-table {
+    border-bottom: 2px;
 }
-*/
 
 .userselect {
     height: 30px;
@@ -250,12 +253,10 @@ input[type=text] {
     width: 360px;
 }
 
-/*
 .emp-add-table td {
-    padding: 8px; 
-    border: 1px solid #ddd; 
+    padding: 2px; /* Increase padding to make rows taller */
+    line-height: 1.5; /* Adjust line height for text */
 }
-*/
 input {
     padding: 4px;
     width: 300px;

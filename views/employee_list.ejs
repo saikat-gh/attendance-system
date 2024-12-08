@@ -3,7 +3,7 @@
 <body class="employee_body">
     <script>
         function homeClicked () {
-        window.location.href="/";
+           window.location.href="/navbar";
         }
         function employeeAdd () {
             let uType = "<%=glbUserType%>";
@@ -37,34 +37,46 @@
         }
         }
 
-        function filterTable() {
-        const searchValue = document.getElementById('searchFld').value.toLowerCase(); // Get search input value
-        
+        function filterTableFn() {
+        const searchValue = document.getElementById('searchFldFn').value.toLowerCase(); // Get search input value
         const table = document.getElementById('employee_table'); // Get the table
         const rows = table.getElementsByTagName('tr'); // Get all rows
-
         // Loop through all table rows (except the header)
         for (let i = 1; i < rows.length; i++) {
-            const locationName = rows[i].getElementsByTagName('td')[0]?.textContent || ''; // Get location name
-            const abbr = rows[i].getElementsByTagName('td')[1]?.textContent || ''; // Get abbreviation
-
-            // Check if the search value matches location name or abbreviation
-            if (locationName.toLowerCase().includes(searchValue) || abbr.toLowerCase().includes(searchValue)) {
-                rows[i].style.display = ''; // Show row
+            const firstName = rows[i].getElementsByTagName('td')[0]?.textContent.trim().toLowerCase() || ''; // Get location name
+            // Check if the first name starts with the search value
+            if (firstName.startsWith(searchValue)) {
+                rows[i].style.display = ''; // Show the row
             } else {
-                rows[i].style.display = 'none'; // Hide row
+                rows[i].style.display = 'none'; // Hide the row
             }
-        }
+        }   
         }
 
-    </script>
+        function filterTableLn() {
+        const searchValue = document.getElementById('searchFldLn').value.toLowerCase(); // Get search input value
+        const table = document.getElementById('employee_table'); // Get the table
+        const rows = table.getElementsByTagName('tr'); // Get all rows
+        // Loop through all table rows (except the header)
+        for (let i = 1; i < rows.length; i++) {
+            const firstName = rows[i].getElementsByTagName('td')[1]?.textContent.trim().toLowerCase() || ''; // Get location name
+            // Check if the last name starts with the search value
+            if (firstName.startsWith(searchValue)) {
+                rows[i].style.display = ''; // Show the row
+            } else {
+                rows[i].style.display = 'none'; // Hide the row
+            }
+        }   
+        }
+</script>
 
     <div class="employee_form_container"> 
       <h3>E m p l o y e e s</h3>
       <hr width="100%" color="yellow" size="5">
       <div class="employee-form-top">
         <div class="employee-form-top-left">
-            <input type="text" onkeyup="filterTable()" id="searchFld" name="searchFld" placeholder="Search for Employee">
+            <input type="text" onkeyup="filterTableFn()" id="searchFldFn" name="searchFldFn" placeholder="Search Employee on First Name">
+            <input type="text" onkeyup="filterTableLn()" id="searchFldLn" name="searchFldLn" placeholder="Search Employee on Last Name">
         </div>
         <div class="employee-form-top-right">
             <button id="addBtn" class="btnAdd" onclick="employeeAdd()"><i class="fa-solid fa-plus" style="background-color:rgb(94, 239, 94)"></i>&nbsp Add Employee</button>

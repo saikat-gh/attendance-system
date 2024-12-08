@@ -578,8 +578,18 @@ router.delete('/location-delete', (req, res) => {
   });
 });
 
-router.get('/users-add', (req, res) => {
-  res.render("users-add", { glbUserName, glbLocaName  });
+router.get('/users-add', async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const result = await client.query('SELECT * FROM location_master order by location_name');
+    const locations = result.rows;
+    res.render("users-add", { glbUserName, glbLocaName, locations });
+  } catch (err) {
+    console.error('Error executing query', err);
+    res.status(500).send('Error fetching Locations');
+  } finally {
+    client.release();
+  }
 });
 
 router.get("/login" , (req, res) => {
@@ -611,38 +621,53 @@ router.get('/generate-report', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid date range.' });
   }
 
+  // const query = `
+  //     SELECT 
+  //         a.date,
+  //         CONCAT(e.fname, ' ', e.lname) AS name,
+  //         a.fotourl,
+  //         MIN(CASE WHEN a.inout = 'IN' THEN a.time END) AS inTime,
+  //         MAX(CASE WHEN a.inout = 'OUT' THEN a.time END) AS outTime
+  //     FROM 
+  //         attendance a
+  //     INNER JOIN 
+  //         employee_master e 
+  //     ON 
+  //         a.empid = e.id
+  //     WHERE 
+  //         a.date BETWEEN $1 AND $2
+  //     GROUP BY 
+  //         a.date, a.empid, e.fname, e.lname, a.fotourl
+  //     ORDER BY 
+  //         a.date, e.fname, e.lname;
+  // `;
   const query = `
-      SELECT 
-          a.date,
-          CONCAT(e.fname, ' ', e.lname) AS name,
-          a.fotourl,
-          MIN(CASE WHEN a.inout = 'IN' THEN a.time END) AS inTime,
-          MAX(CASE WHEN a.inout = 'OUT' THEN a.time END) AS outTime
-      FROM 
-          attendance a
-      INNER JOIN 
-          employee_master e 
-      ON 
-          a.empid = e.id
-      WHERE 
-          a.date BETWEEN $1 AND $2
-      GROUP BY 
-          a.date, a.empid, e.fname, e.lname, a.fotourl
-      ORDER BY 
-          a.date, e.fname, e.lname;
-  `;
-
+    SELECT 
+    date,
+    CONCAT(e.fname, ' ', e.lname) AS name,
+    e.fotourl,
+    MIN(CASE WHEN InOut = 'IN' THEN Time END) AS "InTime",
+    MAX(CASE WHEN InOut = 'OUT' THEN Time END) AS "OutTime"
+    FROM attendance a, employee_master e
+    where a.empid = e.id
+    and a.date BETWEEN $1 AND $2
+    GROUP BY Date, EmpId, e.fotourl, e.fname, e.lname
+    ORDER BY Date, e.fname, e.lname;
+    `;
   const client = await pool.connect();
   try {
       const result = await client.query(query, [startDate, endDate]);
+      console.log(result);
       const report = result.rows.map(row => ({
           date: row.date,
           name: row.name,
-          fotourl: row.fotourl || '/path/to/default/image.jpg', // Fallback for missing images
-          inTime: row.intime || 'N/A',
-          outTime: row.outtime || 'N/A',
+          fotourl: row.fotourl || '/path/to/default/image.jpg',
+          inTime: row.InTime || 'N/A',
+          outTime: row.OutTime || 'N/A',
       }));
-      res.json({ success: true, report });
+      console.log(report);
+      res.render('scr-datewise-attendance', { startDate, endDate, glbLocaName, report });
+//      res.json({ success: true, report });
   } catch (error) {
       console.error('Error generating report:', error);
       res.status(500).json({ success: false, message: 'Error generating report.' });

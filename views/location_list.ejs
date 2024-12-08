@@ -14,23 +14,21 @@
         }
 
         function filterTable() {
-        const searchValue = document.getElementById('searchFld').value.toLowerCase(); // Get search input value
-        
+        const searchValue = document.getElementById('searchFld').value.toLowerCase(); // Get the search input value
         const table = document.getElementById('location_table'); // Get the table
         const rows = table.getElementsByTagName('tr'); // Get all rows
 
-        // Loop through all table rows (except the header)
+         // Loop through all table rows (except the header)
         for (let i = 1; i < rows.length; i++) {
-            const locationName = rows[i].getElementsByTagName('td')[0]?.textContent || ''; // Get location name
-            const abbr = rows[i].getElementsByTagName('td')[1]?.textContent || ''; // Get abbreviation
+            const locationName = rows[i].getElementsByTagName('td')[0]?.textContent.trim().toLowerCase() || ''; // Get location name
 
-            // Check if the search value matches location name or abbreviation
-            if (locationName.toLowerCase().includes(searchValue) || abbr.toLowerCase().includes(searchValue)) {
-                rows[i].style.display = ''; // Show row
+            // Check if the location name starts with the search value
+            if (locationName.startsWith(searchValue)) {
+                rows[i].style.display = ''; // Show the row
             } else {
-                rows[i].style.display = 'none'; // Hide row
+                rows[i].style.display = 'none'; // Hide the row
             }
-        }
+        }   
         }
     
         function deleteLocation(locationId) {
