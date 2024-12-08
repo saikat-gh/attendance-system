@@ -23,9 +23,7 @@ const storage = multer.diskStorage({
       cb(null, 'uploads/'); // Save images in the 'uploads' folder
   },
   filename: function (req, file, cb) {
-      cb(null, "saikat"+".jpg"); // Unique file names-
-/*      cb(null, Date.now() + path.extname(file.originalname)+".jpg"); // Unique file names- */
-
+      cb(null, Date.now() + path.extname(file.originalname)+".jpg"); // Unique file names
   }
 });
 
@@ -151,13 +149,61 @@ router.get('/attendance-capture', async (req, res) => {
 }
 });
 
+router.post('/compare-face', upload.single('photo'), async (req, res) => {
+  try {
+      if (!req.file) {
+          return res.status(400).json({ match: false, error: 'No photo provided' });
+      }
+
+      const capturedPhotoUrl = req.file.path;
+      const empid = req.body.empid;
+      console.log(`Processing face comparison for employee ID: ${empid}`);
+      console.log(`Captured photo path: ${capturedPhotoUrl}`);
+
+      // Get the reference image URL from the database
+      const query = 'SELECT fotourl FROM employee_master WHERE id = $1';
+      console.log(`Fetching reference image for employee ${empid} from database`);
+      const result = await pool.query(query, [empid]);
+      
+      if (result.rows.length === 0) {
+          console.log(`No employee found with ID: ${empid}`);
+          return res.status(404).json({ match: false, error: 'Employee not found' });
+      }
+
+      let referenceImageUrl = result.rows[0].fotourl;
+       referenceImageUrl = referenceImageUrl.substring(1)
+      console.log(`Reference image URL: ${referenceImageUrl}`);
+      
+      // Use your existing face comparison function
+      const { compareFacesPython } = require('../face-comparison/faceComparisonPython');
+      console.log('Starting face comparison...');
+      const similarityScore = await compareFacesPython(capturedPhotoUrl, referenceImageUrl);
+      console.log(`Face comparison complete. Similarity score: ${similarityScore}`);
+      
+      // Define a threshold for matching
+      const threshold = 0.5; // Adjust this value based on your needs
+      console.log(`Checking if similarity score ${similarityScore} meets threshold ${threshold}`);
+      
+      const isMatch = similarityScore >= threshold;
+      console.log(`Face comparison result: ${isMatch ? 'Match' : 'No match'}`);
+      
+      res.json({ 
+          match: isMatch,
+          score: similarityScore 
+      });
+
+  } catch (error) {
+      console.error('Error in face comparison:', error);
+      res.status(500).json({ match: false, error: 'Internal server error' });
+  }
+});
+
 // Route to save Attendance Data
 router.post('/submit-attendance', upload.single('photo'), async (req, res) => {
   try {
       console.log(`Inside Submit attendance`) 
       const { date, time, empid, latitude, longitude, location_id } = req.body;
-      const photoUrl = req.file ? `/uploads/${req.file.filename}` : null;
-
+      const photoUrl = req.file ? `/uploads/${req.file.filename}`+ 'jpg' : null;
       console.log(`Photo url prepared`)
       // Get the location coordinates from location_master
       const locationQuery = 'SELECT lat, long FROM location_master WHERE id = $1';
@@ -183,18 +229,12 @@ router.post('/submit-attendance', upload.single('photo'), async (req, res) => {
           return res.status(400).json({ error: 'You are not within the required radius' });
       }
 
-      // code for image comparison
-      // const frame = cv.imread('photoUrl'); 
-      // const referenceImage = cv.imread('/uploads/test.jpg')
-      // ...... Picking up image URL from eployee database
-      const sql = `select fotourl from employee_master where id = $1`;
-      let empfotoUrl = await pool.query(sql,[empid]);
-      empfotoUrl = empfotoUrl.rows[0].fotourl;
-console.log(empfotoUrl);
-console.log('PhotoUrl:',photoUrl);
-      const { compareFacesPython } = require('../face-comparison/faceComparisonPython');
-      let similarityScore = await compareFacesPython(photoUrl, empfotoUrl);
-      console.log(`Similarity score : ${similarityScore}`);
+      // // code for image comparison
+      // // const frame = cv.imread('photoUrl'); 
+      // // const referenceImage = cv.imread('/uploads/test.jpg')
+      // const { compareFacesPython } = require('../face-comparison/faceComparisonPython');
+      // let similarityScore = await compareFacesPython(photoUrl, '/uploads/test.jpg');
+      // console.log(`Similarity score : ${similarityScore}`);
 
       // Check the count of attendance records for the same empid and date
       const countQuery = `
@@ -574,7 +614,6 @@ router.get("/users", async (req, res) => {
 router.get("/rptDatewiseAttendance" , (req, res) => {
   res.render("rpt-datewise-attendance",{ glbUserType, glbUserName, glbLocaName });
 });
-
 router.get('/generate-report', async (req, res) => {
   const { startDate, endDate } = req.query;
 
