@@ -169,7 +169,7 @@
 }
 
 .users-add-form-container{
-    height: 330px;
+    height: 350px;
     width: 600px;
     background-color: rgb(201, 236, 78);
     position: absolute;
@@ -197,7 +197,7 @@
     border-collapse: collapse;
     background-color: rgb(201, 236, 78);
     margin-top: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 5px;
     border-spacing: 20px;
     width: 100%;
 }

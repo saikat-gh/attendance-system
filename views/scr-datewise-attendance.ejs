@@ -1,86 +1,99 @@
+<!DOCTYPE html>
+<html>
 <head>
     <style>
-        .report-container {
-            margin-top: 20px;
-        }
-
-        .report-table {
+        table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin: 20px 0;
         }
-
-        .report-table th, .report-table td {
-            border: 1px solid #ddd;
+        th, td {
             padding: 8px;
-            text-align: center;
+            text-align: left;
         }
-
-        .report-table th {
-            background-color: #f4f4f4;
+        .date-header {
+            background-color: #f0f0f0;
             font-weight: bold;
         }
-
-        .employee-name {
-            display: flex;
-            align-items: center;
-            justify-content: start;
-            gap: 10px;
+        .employee-separator {
+            border-bottom: 1px dashed #ccc;
         }
-
-        .employee-name img {
-            width: 40px;
-            height: 40px;
+        .date-separator {
+            border-bottom: 2px solid #000;
+        }
+        .empty-cell {
+            border: none;
+        }
+        .employee-photo {
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             object-fit: cover;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ddd;
         }
     </style>
 </head>
 <body>
-    <div class="report-container">
-        <h3>Attendance Report for Location <%= glbLocaName %></h3>
-        <h4>From Date <%= startDate %>  To Date <%= endDate %> </h4>
-        <div class="report-area" id="report-area">
-<!--  Want to print the report here -->
-        </div>
-    </div>
-
-    <script>
-        // Report data from server-side
-        const report = <%- JSON.stringify(report) %>;
-        
-        function renderReport(report) {
-            const container = document.getElementById('report-area');
-            container.innerHTML = `
-                <table class="report-table">
-                    <thead>
+    <h2>Attendance Report (<%= startDate %> to <%= endDate %>)</h2>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Employee Photo</th>
+                <th>Employee Name</th>
+                <th>In Time</th>
+                <th>Out Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% Object.entries(reportData).forEach(([date, employees]) => { %>
+                <% let isFirstEmployeeForDate = true; %>
+                <% let totalRowsForDate = Object.values(employees).reduce((acc, emp) => acc + emp.entries.length, 0); %>
+                
+                <% Object.entries(employees).forEach(([empName, data]) => { %>
+                    <% data.entries.forEach((entry, entryIndex) => { %>
                         <tr>
-                            <th>Date</th>
-                            <th>Employee Name</th>
-                            <th>In Time</th>
-                            <th>Out Time</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${report.map(row => `
-                            <tr>
-                                <td>${row.date}</td>
-                                <td class="employee-name">
-                                    <img src="${row.fotourl}" alt="${row.name}">
-                                    ${row.name}
+                            <% if (isFirstEmployeeForDate && entryIndex === 0) { %>
+                                <td rowspan="<%= totalRowsForDate %>">
+                                    <% 
+                                    const dateObj = new Date(date);
+                                    if (!isNaN(dateObj)) {
+                                        const day = String(dateObj.getDate()).padStart(2, '0');
+                                        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                                        const monthName = monthNames[dateObj.getMonth()];
+                                        const year = dateObj.getFullYear();
+                                    %>
+                                        <%= `${day}-${monthName}-${year}` %>
+                                    <% } else { %>
+                                        Invalid Date
+                                    <% } %>
                                 </td>
-                                <td>${row.inTime}</td>
-                                <td>${row.outTime}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-        }
-
-        // Render the report on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            renderReport(report);
-        });
-    </script>
+                            <% } %>
+                            
+                            <% if (entryIndex === 0) { %>
+                                <td rowspan="<%= data.entries.length %>">
+                                    <img src="<%= data.fotourl %>" alt="<%= empName %>" class="employee-photo">
+                                </td>
+                                <td rowspan="<%= data.entries.length %>"><%= empName %></td>
+                            <% } %>
+                            
+                            <td><%= entry.inTime %></td>
+                            <td><%= entry.outTime %></td>
+                        </tr>
+                    <% }); %>
+                    <% isFirstEmployeeForDate = false; %>
+                <% }); %>
+                
+                <tr class="date-separator">
+                    <td colspan="5"></td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
 </body>
+</html>

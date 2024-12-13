@@ -203,7 +203,7 @@ router.post('/submit-attendance', upload.single('photo'), async (req, res) => {
   try {
       console.log(`Inside Submit attendance`) 
       const { date, time, empid, latitude, longitude, location_id } = req.body;
-      const photoUrl = req.file ? `/uploads/${req.file.filename}`+ 'jpg' : null;
+      const photoUrl = req.file ? `/uploads/${req.file.filename}` : null;
       console.log(`Photo url prepared`)
       // Get the location coordinates from location_master
       const locationQuery = 'SELECT lat, long FROM location_master WHERE id = $1';
@@ -237,6 +237,7 @@ router.post('/submit-attendance', upload.single('photo'), async (req, res) => {
       // console.log(`Similarity score : ${similarityScore}`);
 
       // Check the count of attendance records for the same empid and date
+      console.log(`fetching Attendance counnt`)
       const countQuery = `
       SELECT COUNT(*) as count 
       FROM attendance 
@@ -258,9 +259,9 @@ router.post('/submit-attendance', upload.single('photo'), async (req, res) => {
       await pool.query(insertQuery, [date, time, empid, latitude, longitude, location_id, photoUrl, inout]);
       console.log(`Attendance saved to database`)
       // Redirect if the request expects a redirect
-        if (req.headers.accept.includes('text/html')) {
-            return res.redirect(`/attendance/${location_id}`);
-        }
+        // if (req.headers.accept.includes('text/html')) {
+        //     return res.redirect(`/attendance/${location_id}`);
+        // }
 
         // Send JSON response if requested via JavaScript
         res.json({ success: true, redirectUrl: `/attendance/${location_id}` });
@@ -468,7 +469,7 @@ router.post('/login', async (req, res) => {
 });
 
 router.get('/navbar', (req, res) => {
-  res.render('menu', { glbUserName, glbLocaName });
+  res.render('menu', { glbUserName, glbLocaName, glbUserType, glbLocaCode});
 });
 
 // Route to list all Locations
@@ -592,6 +593,22 @@ router.get('/users-add', async (req, res) => {
   }
 });
 
+router.post('/users-add', async (req, res) => {
+  const client = await pool.connect();
+  try {
+    console.log(req.body)
+    const { location_id, username, usertype, password, password1 } = req.body;
+      // Insert data into the database
+      const result = await client.query('INSERT INTO user_master (userlocation, username, usertype, userpwd) VALUES ($1, $2, $3, $4)', [location_id, username, usertype, password]);
+      const result1 = await client.query('SELECT * FROM location_master order by location_name');
+      const locations = result1.rows;
+      res.render("users-add", { glbUserName, glbLocaName, locations });
+  } catch (error) {
+      console.error('Error inserting data:', error);
+      res.status(500).send('Internal Server Error');
+  }
+});
+
 router.get("/login" , (req, res) => {
   res.render("login");
 });
@@ -612,68 +629,91 @@ router.get("/users", async (req, res) => {
 })
 
 router.get("/rptDatewiseAttendance" , (req, res) => {
-  res.render("rpt-datewise-attendance",{ glbUserType, glbUserName, glbLocaName });
+  res.render("rpt-datewise-attendance",{ glbUserType, glbUserName, glbLocaName, glbLocaCode });
 });
+
 router.get('/generate-report', async (req, res) => {
   const { startDate, endDate } = req.query;
+  console.log(`Generating attendance report for date range: ${startDate} to ${endDate}`);
 
   if (!startDate || !endDate) {
+      console.log('Missing required date parameters');
       return res.status(400).json({ success: false, message: 'Invalid date range.' });
   }
 
-  // const query = `
-  //     SELECT 
-  //         a.date,
-  //         CONCAT(e.fname, ' ', e.lname) AS name,
-  //         a.fotourl,
-  //         MIN(CASE WHEN a.inout = 'IN' THEN a.time END) AS inTime,
-  //         MAX(CASE WHEN a.inout = 'OUT' THEN a.time END) AS outTime
-  //     FROM 
-  //         attendance a
-  //     INNER JOIN 
-  //         employee_master e 
-  //     ON 
-  //         a.empid = e.id
-  //     WHERE 
-  //         a.date BETWEEN $1 AND $2
-  //     GROUP BY 
-  //         a.date, a.empid, e.fname, e.lname, a.fotourl
-  //     ORDER BY 
-  //         a.date, e.fname, e.lname;
-  // `;
   const query = `
+  WITH NumberedEntries AS (
     SELECT 
+      a.date,
+      CONCAT(e.fname, ' ', e.lname) AS name,
+      e.fotourl,
+      a.time,
+      a.inout,
+      ROW_NUMBER() OVER (PARTITION BY a.date, a.empid, a.inout ORDER BY a.time) as rn_in_out
+    FROM attendance a
+    JOIN employee_master e ON a.empid = e.id
+    WHERE a.date BETWEEN $1 AND $2
+  )
+  SELECT 
     date,
-    CONCAT(e.fname, ' ', e.lname) AS name,
-    e.fotourl,
-    MIN(CASE WHEN InOut = 'IN' THEN Time END) AS "InTime",
-    MAX(CASE WHEN InOut = 'OUT' THEN Time END) AS "OutTime"
-    FROM attendance a, employee_master e
-    where a.empid = e.id
-    and a.date BETWEEN $1 AND $2
-    GROUP BY Date, EmpId, e.fotourl, e.fname, e.lname
-    ORDER BY Date, e.fname, e.lname;
-    `;
-  const client = await pool.connect();
-  try {
-      const result = await client.query(query, [startDate, endDate]);
-      console.log(result);
-      const report = result.rows.map(row => ({
-          date: row.date,
-          name: row.name,
-          fotourl: row.fotourl || '/path/to/default/image.jpg',
-          inTime: row.InTime || 'N/A',
-          outTime: row.OutTime || 'N/A',
-      }));
-      console.log(report);
-      res.render('scr-datewise-attendance', { startDate, endDate, glbLocaName, report });
-//      res.json({ success: true, report });
-  } catch (error) {
-      console.error('Error generating report:', error);
-      res.status(500).json({ success: false, message: 'Error generating report.' });
-  } finally {
-      client.release();
-  }
+    name,
+    fotourl,
+    MAX(CASE WHEN inout = 'IN' THEN time END) as in_time,
+    MAX(CASE WHEN inout = 'OUT' THEN time END) as out_time
+  FROM NumberedEntries
+  GROUP BY date, name, fotourl, rn_in_out
+  ORDER BY date, name, rn_in_out;
+`;
+
+console.log('Executing attendance query...');
+const client = await pool.connect();
+try {
+    const result = await client.query(query, [startDate, endDate]);
+    console.log(`Query returned ${result.rows.length} attendance records`);
+    console.log('Query Result:',result.rows);
+
+   // Group the data by date and employee
+   const groupedData = {};
+   result.rows.forEach(row => {
+       const dateStr = new Date(row.date).toDateString() //.split('T')[0];
+       console.log('Date String:', dateStr);
+       if (!groupedData[dateStr]) {
+           groupedData[dateStr] = {};
+       }
+       if (!groupedData[dateStr][row.name]) {
+           groupedData[dateStr][row.name] = {
+               fotourl: row.fotourl,
+               entries: []
+           };
+       }
+       groupedData[dateStr][row.name].entries.push({
+           inTime: row.in_time ? (row.in_time) : 'N/A',
+           outTime: row.out_time ? (row.out_time) : 'N/A'
+       });
+   });
+
+   console.log('Processed data:', JSON.stringify(groupedData));
+   Object.keys(groupedData).forEach(date => {
+    console.log('Date:', date);
+    Object.keys(groupedData[date]).forEach(employee => {
+      console.log('Employee:', employee);
+      groupedData[date][employee].entries.map((entry)=> {
+        console.log('Entry:', entry);
+      });
+    });
+   });
+   res.render('scr-datewise-attendance', { 
+       startDate, 
+       endDate, 
+       glbLocaName, 
+       reportData: groupedData 
+   });
+} catch (error) {
+   console.error('Error generating report:', error);
+   res.status(500).json({ success: false, message: 'Error generating report.' });
+} finally {
+   client.release();
+}
 });
 
 module.exports = router;

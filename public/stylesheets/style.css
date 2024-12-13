@@ -30,22 +30,22 @@ body {
 
 .left-box .company-name {
     font-family: Times New Roman, Times, serif;
-    font-size: 30px;
+    font-size: 1.88rem;
     font-weight: bold;
     color: rgb(224, 2, 2);
     text-shadow: 2px 1px grey;
-    margin-left: 10px;
+    margin-left: 0.63rem;
 }
 
 .company-name .company-profile {
     font-family: Arial, Helvetica, sans-serif;  
-    font-size: 13px;
+    font-size: 0.75rem;
     text-align: left;
     text-shadow: none;
     color: rgb(202, 24, 107);
     letter-spacing: 1px;
     word-spacing: 2px;
-    font-weight: 800;
+    font-weight: bolder;
 }
 
 .right-box {
@@ -61,7 +61,7 @@ body {
   font-size: 2.0 rem;
   font-weight: bold;
   color: #042c5a;
-  font-size: 30px;
+  font-size: 1.88rem;
   font-weight: bold;
   justify-content:flex-end;
   margin-left: auto;
@@ -184,6 +184,21 @@ body {
   .dropdown:hover .dropdown-content {
     display: block;
   }
+
+  .topnav .user-details {
+    float: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding: 14px 16px;
+    color: white;
+}
+
+.topnav .user-details .user-name,
+.topnav .user-details .user-role {
+    margin: 0;
+    line-height: 1.0;
+}
   
   /* When the screen is less than 600 pixels wide, hide all links, except for the first one ("Home"). Show the link that contains should open and close the topnav (.icon) */
   @media screen and (max-width: 600px) {

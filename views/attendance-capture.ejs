@@ -484,6 +484,7 @@
                 faceGuide.style.display = 'none';
                 guideText.style.display = 'none';
             } else {
+                console.log("show error");
                 showError('Face does not match with the registered image. Please try again.');
                 // Clear the canvas
                 context.clearRect(0, 0, canvas.width, canvas.height);
@@ -540,20 +541,13 @@ function clearError() {
                         body: formData,
                     });
                     response.then((data)=>{
+                        console.log("data",data);
                         data.json().then((resp)=>{
                             console.log("Received: ",resp)
                              // Follow the redirect
                              window.location.href = resp.redirectUrl;
 
                         })
-                        // if (response.redirected) {
-                           
-                        // } else {
-                        //     console.log(`Attendance saved : `,response)
-                        //     if (result.error) {
-                        //         alert(result.error);
-                        //     }
-                        // }
                     })   
                
                 } catch (error) {

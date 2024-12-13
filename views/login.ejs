@@ -9,13 +9,18 @@
             /* background-color: rgb(120, 117, 117);*/
 			/* background-blend-mode: lighten;*/
         }
-    </style>
+		.error-message {
+			color: red;
+			margin-top: 10px;
+			font-size: 14px;
+		}
+	</style>
 	<link rel='stylesheet' href='/stylesheets/style_login.css' />
 </head>
 
 <body>
-
-	<form autocomplete="off" class="login_form" action="/login" method="POST">
+	
+	<form id="login_form" class="login_form" action="/login" method="POST">
 	
 	    <h3 class="heading">Login</h3>
 
@@ -32,11 +37,69 @@
 
 		<label class="labeltxt" for="password"> Password: </label>
 		<input type="password" class="inputboxpassword" name="password" placeholder="Enter your Password" required>
-
+		<div id="disp-error" class="disp-error">
+            <p>Error Message</p>
+           </div>
 		<button class="btn_save" type="submit"> Submit </button>
 
 	</form>
-  
+	<script>
+		function showError(message) {
+            const errorDiv = document.querySelector('.disp-error');
+            const errorMessage = errorDiv.querySelector('p');
+            errorMessage.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            const errorDiv = document.querySelector('.disp-error');
+            errorDiv.style.display = 'none';
+        }
+
+        // When the page loads, ensure error is hidden
+        window.onload = function() {
+            hideError();
+        }
+		document.getElementById('login_form').addEventListener('submit', async (e) => {
+    		e.preventDefault();
+    
+    	try {
+        	const formData = new FormData(e.target);
+        	const username = formData.get('username');
+        	const password = formData.get('password');
+        	
+        	console.log('Attempting login for user:', username);
+        	
+        	const response = await fetch('/login', {
+            	method: 'POST',
+            	headers: {
+                	'Content-Type': 'application/json',
+            	},
+            	body: JSON.stringify({
+                	username,
+                	password
+            	})
+        	});
+
+        	console.log('Login response status:', response);
+
+        	if (response.ok) {
+            	console.log('Login successful, redirecting to navbar');
+            	window.location.href = '/navbar';
+        	} else {
+				console.log('Login failed');
+            	const data = await response.statusText;
+            	console.log('Login failed:', data);
+            	// document.getElementById('disp-error').textContent = data;
+				showError(data);
+        	}
+    	} catch (err) {
+        	console.error('Login error:', err);
+        	document.getElementById('disp-error').textContent = 'An error occurred. Please try again.';
+    	}
+		});
+	</script>
+
 </body>
 
 

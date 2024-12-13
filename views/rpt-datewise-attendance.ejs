@@ -6,16 +6,11 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            padding: 20px;
         }
 
         .form-container{
-<<<<<<< HEAD
-            height: 330px;
-=======
-            height: 430px;
->>>>>>> fa1bc37ce01983874f4079ba8fed2579fc2fbec2
-            width: 600px;
+            height: 250px;
+            width: 550px;
             background-color: rgb(239, 211, 234);
             position: absolute;
             transform: translate(-50%,-50%);
@@ -48,13 +43,10 @@
             width: 100%;
         }
 
-<<<<<<< HEAD
         .tbl-date-report td {
             text-align: center;
         }
 
-=======
->>>>>>> fa1bc37ce01983874f4079ba8fed2579fc2fbec2
         .form-container input {
             padding: 5px;
             margin: 5px;
@@ -62,8 +54,8 @@
         }
 
         .form-container button {
-            padding: 8px 16px;
-            margin: 5px;
+/*            padding: 8px 16px;
+            margin: 5px;  */
             font-weight: bold;
             cursor: pointer;
         }
@@ -102,9 +94,40 @@
             border-radius: 50%;
             object-fit: cover;
         }
+        .btn-grp {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+        .btn-generate {
+            background-color: #007bff;
+            color: white;
+            width: 11rem;
+            height: 2.5rem;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;  
+            border: none;
+            border-radius: 5px;
+        }
+        .btn-closed {
+            background-color: #ff0000e3;
+            color: white;
+            width: 11rem;
+            height: 2.5rem;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;  
+            border: none;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
+    <script>
+        function closeClicked () {
+        window.location.href="/navbar";
+        }
+    </script>
     <div class="form-container">
         <h3>Generate Attendance Report</h3>
         <form id="report-form">
@@ -117,11 +140,12 @@
                     <td><label for="endDate">End Date:</label></td>
                     <td><input type="date" id="endDate" name="endDate" required></td>
                 </tr>
-                <tr>
-                    <td><button type="button" onclick="generateReport()">Generate Report</button></td>
-                    <td><button type="button" onclick="closeForm()">Close</button></td>
-                </tr>
             </table>
+                <div class="btn-grp">
+                        <button type="button" class="btn-generate" onclick="generateReport()">Generate Report</button>
+                        <button type="button" class="btn-closed" onclick="closeClicked()">Close</button>
+                </div>
+            
         </form>
     </div>
 
@@ -143,7 +167,6 @@
                 alert('Please select both start and end dates.');
                 return;
             }
-<<<<<<< HEAD
             window.location.href = `/generate-report?startDate=${startDate}&endDate=${endDate}`;
             // fetch(`/generate-report?startDate=${startDate}&endDate=${endDate}`)
             //     .then(response => response.json())
@@ -155,19 +178,6 @@
             //         }
             //     })
             //     .catch(err => console.error('Error fetching the report:', err));
-=======
-
-            fetch(`/generate-report?startDate=${startDate}&endDate=${endDate}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        renderReport(data.report);
-                    } else {
-                        alert('Failed to fetch the report.');
-                    }
-                })
-                .catch(err => console.error('Error fetching the report:', err));
->>>>>>> fa1bc37ce01983874f4079ba8fed2579fc2fbec2
         }
 
         function renderReport(report) {
