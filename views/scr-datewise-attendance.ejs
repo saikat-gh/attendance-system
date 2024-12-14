@@ -2,6 +2,34 @@
 <html>
 <head>
     <style>
+        @media print {
+            /* Hide any elements not meant for printing */
+            .no-print {
+                display: none;
+            }
+            /* Ensure table fits on printed page */
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 20px 0;
+                page-break-inside: auto;
+            }
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+            th, td {
+                padding: 8px;
+                text-align: left;
+            }
+        }
+        /* Regular styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -25,8 +53,8 @@
             border: none;
         }
         .employee-photo {
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             object-fit: cover;
         }
@@ -35,11 +63,37 @@
             text-align: left;
             border: 1px solid #ddd;
         }
+        .print-button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            display: block;
+            margin-left: auto;
+        }
     </style>
+    <script>
+        function printReport() {
+            window.print();
+        }
+    </script>
 </head>
 <body>
-    <h2>Attendance Report (<%= startDate %> to <%= endDate %>)</h2>
+    <button onclick="printReport()" class="print-button no-print">Print Report</button>
     
+    <h2>Attendance Report (<% 
+        const startDateObj = new Date(startDate);
+        const endDateObj = new Date(endDate);
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const formattedStartDate = `${String(startDateObj.getDate()).padStart(2, '0')}-${monthNames[startDateObj.getMonth()]}-${startDateObj.getFullYear()}`;
+        const formattedEndDate = `${String(endDateObj.getDate()).padStart(2, '0')}-${monthNames[endDateObj.getMonth()]}-${endDateObj.getFullYear()}`;
+    %><%= formattedStartDate %> to <%= formattedEndDate %>)</h2>
+    <h3>Location: <%= glbLocaName %></h3>
     <table>
         <thead>
             <tr>
