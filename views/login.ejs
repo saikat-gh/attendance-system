@@ -9,10 +9,12 @@
             /* background-color: rgb(120, 117, 117);*/
 			/* background-blend-mode: lighten;*/
         }
-		.error-message {
+		.disp-error > p {
 			color: red;
-			margin-top: 10px;
+			margin-top: 5px;
 			font-size: 14px;
+			font-weight: bold;
+			text-align: center;
 		}
 	</style>
 	<link rel='stylesheet' href='/stylesheets/style_login.css' />
@@ -36,14 +38,20 @@
 		  </select>
 
 		<label class="labeltxt" for="password"> Password: </label>
-		<input type="password" class="inputboxpassword" name="password" placeholder="Enter your Password" required>
+		<input type="password" class="inputboxpassword" name="password" placeholder="Enter your Password" onkeyup="chkEmpty()" required>
 		<div id="disp-error" class="disp-error">
             <p>Error Message</p>
-           </div>
+        </div>
 		<button class="btn_save" type="submit"> Submit </button>
 
 	</form>
 	<script>
+		function chkEmpty() {
+			const password = document.querySelector('.inputboxpassword').value;
+			if (password.length == 0) {
+				hideError();
+			}
+		}
 		function showError(message) {
             const errorDiv = document.querySelector('.disp-error');
             const errorMessage = errorDiv.querySelector('p');
@@ -91,7 +99,7 @@
             	const data = await response.statusText;
             	console.log('Login failed:', data);
             	// document.getElementById('disp-error').textContent = data;
-				showError('Invalid Password);
+				showError('Invalid Password');
         	}
     	} catch (err) {
         	console.error('Login error:', err);

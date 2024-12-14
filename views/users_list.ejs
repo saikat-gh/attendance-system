@@ -5,7 +5,10 @@
         window.location.href="/navbar";
         }
         function usersAdd () {
-            window.location.href="/users-add";
+            let uType = "<%=glbUserType%>";
+            if (uType==="admin") {
+                window.location.href="/users-add";
+            }
         }
 
         function srchTxtUsr() {

@@ -23,7 +23,8 @@ const storage = multer.diskStorage({
       cb(null, 'uploads/'); // Save images in the 'uploads' folder
   },
   filename: function (req, file, cb) {
-      cb(null, Date.now() + path.extname(file.originalname)+".jpg"); // Unique file names
+      // cb(null, Date.now() + path.extname(file.originalname)+".jpg"); // Unique file names
+      cb(null, Date.now() + path.extname(file.originalname)); // Unique file names
   }
 });
 
@@ -328,7 +329,7 @@ router.get('/employee-add', async(req, res) => {
   try {
     const result = await client.query('SELECT * FROM location_master order by location_name');
     const locations = result.rows;
-    res.render("employee-add",  { locations, glbUserName, glbLocaName, glbLocaCode });
+    res.render("employee-add",  { locations, glbUserName, glbLocaName, glbLocaCode, glbUserType });
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).send('Error fetching Employees');
@@ -353,13 +354,17 @@ router.post('/employee-add', upload.single('image'), async(req, res) => {
   const query = `INSERT INTO employee_master (fname, lname, addr1, addr2, city, state, pincode, mobile, email, esino, uanno, fotourl, location_id)
                  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`;
   const values = [fname, lname, addr1, addr2, city, state, pincode, mobile, email, esino, uanno, imageUrl, location.id];
-  client.query(query, values, (err, result) => {
+  client.query(query, values, async (err, result) => {
       if (err) {
           console.error('Error inserting data:', err);
           res.status(500).send('Error saving Employee Data');
       } else {
-        console.log("From POST Route - Redirecting to Employee Add Form");
-        res.render("employee-add", { glbUserName, glbLocaName, glbLocaCode });
+        console.log("From POST Route -> Redirecting to Employee Add Form");
+        const result = await client.query('SELECT * FROM location_master order by location_name');
+      const locations = result.rows;
+      console.log(locations);
+    res.render("employee-add",  { locations, glbUserName, glbLocaName, glbLocaCode, glbUserType });
+        // res.render("employee-add", { glbUserName, glbLocaName, glbLocaCode });
       }
   });
 });
@@ -376,7 +381,7 @@ router.get('/employee-edit', async(req, res) => {
     const eresult = await client.query('SELECT employee_master.*, location_master.location_name FROM employee_master, location_master WHERE employee_master.id = $1 and employee_master.location_id = location_master.id', [empId]);
     const employees = eresult.rows;
 
-    res.render('employee-edit', { employees,locations, glbUserName, glbLocaName  });
+    res.render('employee-edit', { employees,locations, glbUserName, glbLocaName, glbLocaCode, glbUserType });
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).send('Error fetching Locations');
@@ -479,7 +484,7 @@ router.get('/location', async (req, res) => {
     const result = await client.query('SELECT * FROM location_master order by location_name');
 //    console.log(result.rows);
     const locations = result.rows;
-    res.render('location_list', { locations, glbUserName, glbLocaName, glbUserType });
+    res.render('location_list', { locations, glbUserName, glbLocaName, glbLocaCode, glbUserType });
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).send('Error fetching Locations');
@@ -491,7 +496,7 @@ router.get('/location', async (req, res) => {
 
 // Route to handle Location Add Form Display request
 router.get('/location-add', (req, res) => {
-  res.render("location-add", { glbUserName, glbLocaName  });
+  res.render("location-add", { glbUserName, glbLocaName, glbLocaCode, glbUserType });
 });
 
 // Route to handle Location Add request
@@ -502,7 +507,7 @@ router.post('/location-add', async (req, res) => {
     const { location_name, address1, address2, address3, abbr, lat, long } = req.body;
       // Insert data into the database
       const result = await client.query('INSERT INTO location_master (location_name, location_addr1, location_addr2, location_addr3, abbr, lat, long) VALUES ($1, $2, $3, $4, $5, $6, $7)', [location_name, address1, address2, address3, abbr, lat, long]);
-      res.render("location-add", { glbUserName, glbLocaName  });
+      res.render("location-add", { glbUserName, glbLocaName, glbLocaCode, glbUserType });
   } catch (error) {
       console.error('Error inserting data:', error);
       res.status(500).send('Internal Server Error');
@@ -519,7 +524,7 @@ router.get('/location-edit', async(req, res) => {
     const result = await client.query('SELECT * FROM location_master WHERE id = $1', [locationId]);
     console.log(result.rows);
     const locations = result.rows;
-    res.render('location-edit', { locations, glbUserName, glbLocaName  });
+    res.render('location-edit', { locations, glbUserName, glbLocaName, glbLocaCode, glbUserType });
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).send('Error fetching Locations');
@@ -584,7 +589,7 @@ router.get('/users-add', async (req, res) => {
   try {
     const result = await client.query('SELECT * FROM location_master order by location_name');
     const locations = result.rows;
-    res.render("users-add", { glbUserName, glbLocaName, locations });
+    res.render("users-add", { glbUserName, glbLocaName, glbLocaCode, glbUserType, locations });
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).send('Error fetching Locations');
@@ -602,7 +607,7 @@ router.post('/users-add', async (req, res) => {
       const result = await client.query('INSERT INTO user_master (userlocation, username, usertype, userpwd) VALUES ($1, $2, $3, $4)', [location_id, username, usertype, password]);
       const result1 = await client.query('SELECT * FROM location_master order by location_name');
       const locations = result1.rows;
-      res.render("users-add", { glbUserName, glbLocaName, locations });
+      res.render("users-add", { glbUserName, glbLocaName, glbLocaCode, glbUserType, locations });
   } catch (error) {
       console.error('Error inserting data:', error);
       res.status(500).send('Internal Server Error');
@@ -619,7 +624,7 @@ router.get("/users", async (req, res) => {
     const result = await client.query('SELECT userid, username, userpwd, usertype, location_name \
      FROM user_master, location_master where user_master.userlocation = location_master.id order by username');
     const users = result.rows;
-    res.render('users_list', { users , glbUserName, glbLocaName  });
+    res.render('users_list', { users , glbUserName, glbLocaName, glbLocaCode, glbUserType });
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).send('Error fetching Users');

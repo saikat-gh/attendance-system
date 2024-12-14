@@ -26,39 +26,39 @@
                         </tr>
                         <tr>
                             <td><lable for ="addr1">Address Line 1</lable></td>
-                            <td><input type="text" id="addr1" name="addr1" placeholder="Enter Address Line 1" required></td>
+                            <td><input type="text" id="addr1" name="addr1" placeholder="Enter Address Line 1" ></td>
                         </tr>
                         <tr>
                             <td><lable for ="addr2">Address Line 2</lable></td>
-                            <td><input type="text" id="addr2" name="addr2" placeholder="Enter Address Line 2" required></td>
+                            <td><input type="text" id="addr2" name="addr2" placeholder="Enter Address Line 2" ></td>
                         </tr>
                         <tr>
                             <td><lable for ="city">City</lable></td>
-                            <td><input type="text" id="city" name="city" placeholder="Enter your City" required></td>
+                            <td><input type="text" id="city" name="city" placeholder="Enter your City" ></td>
                         </tr>
                         <tr>
                             <td><lable for ="state">State</lable></td>
-                            <td><input type="text" id="state" name="state" placeholder="Enter your State" required></td>
+                            <td><input type="text" id="state" name="state" placeholder="Enter your State" ></td>
                         </tr>
                         <tr>
                             <td><lable for ="pincode">Pin Code</lable></td>
-                            <td><input type="text" id="pincode" name="pincode" placeholder="Enter your Pin Code" required></td>
+                            <td><input type="text" id="pincode" name="pincode" placeholder="Enter your Pin Code" ></td>
                         </tr>
                         <tr>
                             <td><lable for ="mobile">Mobile No</lable></td>
-                            <td><input type="text" id="mobile" name="mobile" placeholder="Enter your Mobile Number" required></td>
+                            <td><input type="text" id="mobile" name="mobile" placeholder="Enter your Mobile Number" ></td>
                         </tr>
                         <tr>
                             <td><lable for ="email">Email</lable></td>
-                            <td><input type="text" id="email" name="email" placeholder="Enter your E-mail" required></td>
+                            <td><input type="text" id="email" name="email" placeholder="Enter your E-mail" ></td>
                         </tr>
                         <tr>
                             <td><lable for ="esino">ESI Number</lable></td>
-                            <td><input type="text" id="esino" name="esino" placeholder="Enter ESI Number" required></td>
+                            <td><input type="text" id="esino" name="esino" placeholder="Enter ESI Number" ></td>
                         </tr>
                         <tr>
                             <td><lable for ="uanno">UAN Number</lable></td>
-                            <td><input type="text" id="uanno" name="uanno" placeholder="Enter UAN number" required></td>
+                            <td><input type="text" id="uanno" name="uanno" placeholder="Enter UAN number" ></td>
                         </tr>
 
                     </table>
@@ -177,7 +177,8 @@
             if (response.ok) {
                 console.log('Data and image uploaded successfully');
                 // Optional: Redirect or show a success message
-                res.render('employee-add', { glbUserName, glbLocaName, glbLocaCode });
+                window.location.href="/employee-add";
+                // res.render('employee-add', { glbUserName, glbLocaName, glbLocaCode });
             } else {
                 console.error('Upload failed');
             }
@@ -187,4 +188,3 @@
     });
 </script>
 </body>
-</html>
