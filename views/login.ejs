@@ -91,7 +91,7 @@
             	const data = await response.statusText;
             	console.log('Login failed:', data);
             	// document.getElementById('disp-error').textContent = data;
-				showError(data);
+				showError('Invalid Password);
         	}
     	} catch (err) {
         	console.error('Login error:', err);
