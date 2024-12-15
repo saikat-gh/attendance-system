@@ -541,14 +541,30 @@ function clearError() {
                         body: formData,
                     });
                     response.then((data)=>{
-                        console.log("data",data);
-                        data.json().then((resp)=>{
-                            console.log("Received: ",resp)
-                             // Follow the redirect
-                             window.location.href = resp.redirectUrl;
-
-                        })
-                    })   
+                        console.log("data", data);
+                        if (data.status === 400) {
+                            // Handle 400 Bad Request
+                            data.json().then((resp) => {
+                                console.log("Error response:", resp);
+                                showError(resp.error || 'Invalid request. Please try again.');
+                            });
+                            return;
+                        }
+                        else{
+                            data.json().then((resp)=>{
+                            console.log("Received: ", resp);
+                            if (resp.redirectUrl) {
+       window.location.href = resp.redirectUrl;
+                            } else {
+                                showSuccess('Attendance submitted successfully');
+                            }
+                        });
+                        }
+                        
+                    }).catch((error) => {
+                        console.error('Error submitting attendance:', error);
+                        showError('Failed to submit attendance. Please try again.');
+                    });
                
                 } catch (error) {
                     console.error('Error submitting attendance:', error);

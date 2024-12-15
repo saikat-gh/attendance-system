@@ -1,13 +1,20 @@
-# Use Node.js LTS version as base image
-FROM node:18-slim
+# Use Python slim image as base
+FROM python:3.9-slim
 
-# Install system dependencies for image processing
+# Install system dependencies for face_recognition and Node.js
 RUN apt-get update && apt-get install -y \
-    python3-full \
-    python3-pip \
-    python3-venv \
-    libgl1-mesa-glx \
-    libglib2.0-0 \
+    build-essential \
+    cmake \
+    pkg-config \
+    libx11-dev \
+    libatlas-base-dev \
+    libgtk-3-dev \
+    libboost-python-dev \
+    python3-dev \
+    libdlib-dev \
+    curl \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 # Create app directory
@@ -19,22 +26,24 @@ RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Install Python dependencies in the virtual environment
-RUN pip3 install opencv-python scikit-image
+RUN pip3 install --no-cache-dir \
+    face_recognition \
+    dlib
 
-# Copy package files
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install app dependencies
+# Install Node.js dependencies
 RUN npm install
 
-# Copy app source
+# Copy the rest of the application
 COPY . .
 
-# Create uploads directory
-RUN mkdir -p uploads && chmod 777 uploads
+# Create uploads directory with proper permissions
+# RUN mkdir -p uploads && chmod 777 uploads
 
-# Expose port
+# Expose the port your app runs on
 EXPOSE 3000
 
-# Start command
-CMD ["npm", "start"]
+# Start the application
+CMD ["npm", "run", "start:prod"]
