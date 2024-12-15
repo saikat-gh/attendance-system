@@ -30,6 +30,19 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// Set up multer for image uploads
+const storageFaceCompute = multer.diskStorage({
+  destination: function (req, file, cb) {
+      cb(null, 'uploads/'); // Save images in the 'uploads' folder
+  },
+  filename: function (req, file, cb) {
+       cb(null, Date.now() + path.extname(file.originalname)+".jpg"); // Unique file names
+      //cb(null, Date.now() + path.extname(file.originalname)); // Unique file names
+  }
+});
+
+const uploadFaceCompute = multer({ storage: storageFaceCompute });
+
 /* Toggle between adding and removing the "responsive" class to topnav when the user clicks on the icon */
 function myFunction() {
     var x = document.getElementById("myTopnav");
@@ -150,7 +163,7 @@ router.get('/attendance-capture', async (req, res) => {
 }
 });
 
-router.post('/compare-face', upload.single('photo'), async (req, res) => {
+router.post('/compare-face', uploadFaceCompute.single('photo'), async (req, res) => {
   try {
       if (!req.file) {
           return res.status(400).json({ match: false, error: 'No photo provided' });

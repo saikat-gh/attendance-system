@@ -1,4 +1,5 @@
 import face_recognition
+import sys
 
 def compare_faces(image1_path, image2_path):
     try:
@@ -11,7 +12,7 @@ def compare_faces(image1_path, image2_path):
         face_encoding2 = face_recognition.face_encodings(image2)
 
         if not face_encoding1 or not face_encoding2:
-            print("Could not find a face in one or both images.")
+            print("0.0")  # Return 0 if no face is found
             return
 
         # Compare the first face found in each image
@@ -20,19 +21,25 @@ def compare_faces(image1_path, image2_path):
 
         # Calculate the face distance (lower is more similar)
         face_distance = face_recognition.face_distance([face_encoding1], face_encoding2)[0]
-        result = face_recognition.compare_faces([face_encoding1], face_encoding2)[0]
-
-        if result:
-            print(f"The faces match! (Face distance: {face_distance:.4f})")
-        else:
-            print(f"The faces do not match. (Face distance: {face_distance:.4f})")
+        
+        # Convert face distance to similarity score (1 - distance for more intuitive scoring)
+        similarity_score = 1 - face_distance
+        
+        # Print just the similarity score
+        print(f"{similarity_score:.4f}")
 
     except Exception as e:
         print(f"An error occurred: {e}")
+        print("0.0")  # Return 0 on error
 
-# Example usage
-# Replace with the paths to your images
-image1_path = "uploads/1732634792224.jpg"
-image2_path = "uploads/1729781545897.jpg"
+if __name__ == "__main__":
+    # Check if correct number of arguments are provided
+    if len(sys.argv) != 3:
+        print("0.0")
+        sys.exit(1)
 
-compare_faces(image1_path, image2_path)
+    # Get image paths from command line arguments
+    image1_path = sys.argv[1]
+    image2_path = sys.argv[2]
+
+    compare_faces(image1_path, image2_path)

@@ -14,7 +14,7 @@ function compareFacesPython(image1Path, image2Path) {
 
     return new Promise((resolve, reject) => {
         // Get absolute path to Python script
-        const scriptPath = path.join(__dirname, 'faceComparison.py');
+        const scriptPath = path.join(__dirname, 'faceComparisonReloaded.py');
         console.log(`Python script path: ${scriptPath}`);
 
         // Spawn Python process
@@ -52,7 +52,7 @@ function compareFacesPython(image1Path, image2Path) {
 
             // Extract similarity score from output
             console.log('Parsing similarity score from output',result);
-            //const match = result.match(/Similarity Score: ([\d.]+)/);
+            //const match = result.match(/similarity_score: ([\d.]+)/);
             if (result) {
                 const score = parseFloat(result);
                 console.log(`Successfully parsed similarity score: ${score}`);
