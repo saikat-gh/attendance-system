@@ -29,15 +29,32 @@
         background: transparent;
     }
     
-    .employee_form_container  > h3 {
+    .header-left  > h3 {
         background-color: rgb(74, 74, 74);
         text-align: center;
         text-shadow: 0 3px rgb(17, 1, 1);
         font-size: 2.0 rem;
         font-weight: bold;
         color: #dbf476;
+        padding-bottom: 8px;
+       
     }
     
+    .header-right > label {
+        color: #dbf476;
+        font-weight: bold;
+    }
+
+    .header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items:center;
+        background-color: rgb(74,74,74);
+        border-bottom: 2px solid rgb(165, 165, 88);
+        padding-bottom: 1px;
+        margin-bottom: 5px;
+    }
     .employee-form-top {
         display:flex;
         flex-direction: row;
@@ -60,6 +77,13 @@
         gap: 5px;
     }
     
+    #selectLocation {
+        height: 30px;
+        width: 360px;
+        border: none;
+        border-radius: 5px;
+    }
+
     input {
         border: none;
         border-radius: 5px;

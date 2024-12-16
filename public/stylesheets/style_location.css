@@ -1,5 +1,6 @@
 .location_body {
     background-color: #918f8f;
+    font-family:'Courier New', Courier, monospace
 }
 
 .location_form_container{
@@ -121,6 +122,7 @@
 .location_table {
     width: 100%;
     background-color: gray;
+    
 }
 
 .location_table th {
@@ -129,6 +131,7 @@
 
 .location_table tr {
     border-bottom: 1px solid #ddd;
+    height: 30px;
   }
 
 .location_table tr:hover td {

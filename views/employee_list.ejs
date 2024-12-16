@@ -13,28 +13,31 @@
         }
 
         function deleteEmployee(empId) {
-        if (confirm("Are you sure you want to delete this Employee ?")) {
-            fetch(`/employee-delete?id=${empId}`, {
-                method: 'DELETE',
-            })
-            .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to delete Employee');
+            let uType = "<%=glbUserType%>";
+            if (uType==="admin") {
+                if (confirm("Are you sure you want to delete this Employee ?")) {
+                    fetch(`/employee-delete?id=${empId}`, {
+                        method: 'DELETE',
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to delete Employee');
+                        }
+                        return response.text();
+                    })
+                    .then(message => {
+                    alert(message);
+                    // Remove the row from the table
+                    const row = document.querySelector(`tr[data-key='${empId}']`);
+                    if (row) {
+                        row.parentNode.removeChild(row); // Removes the row from the DOM
+                    } else {
+                        console.error("Row not found in the table.");
+                    }
+                    })
+                    .catch(error => console.error('Error deleting Employee:', error));
+                }
             }
-                return response.text();
-            })
-            .then(message => {
-                alert(message);
-                // Remove the row from the table
-                const row = document.querySelector(`tr[data-key='${empId}']`);
-            if (row) {
-                row.parentNode.removeChild(row); // Removes the row from the DOM
-            } else {
-                console.error("Row not found in the table.");
-            }
-        })
-        .catch(error => console.error('Error deleting Employee:', error));
-        }
         }
 
         function filterTableFn() {
@@ -68,11 +71,67 @@
             }
         }   
         }
+        function updateEmployeeTable(locationId) {
+    // Fetch employees for the selected location
+    fetch(`/get-employees-by-location?locationId=${locationId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch employees');
+            }
+            return response.json(); // Parse JSON data
+        })
+        .then(employees => {
+            const tableBody = document.querySelector('#employee_table tbody');
+            
+            // Clear existing table rows
+            tableBody.innerHTML = '';
+
+            // Populate the table with the fetched employees
+            employees.forEach(employee => {
+                const row = document.createElement('tr');
+                row.setAttribute('data-key', employee.id);
+
+                row.innerHTML = `
+                    <td>${employee.fname}</td>
+                    <td>${employee.lname}</td>
+                    <td>
+                        <img src="${employee.fotourl}" alt="" style="width: 30px; height: 30px; border-radius: 50%;">
+                    </td>
+                    <td>
+                        <a class="editTag" href="/employee-edit?id=${employee.id}">Edit</a>
+                        <button class="btnDelete" onClick="deleteEmployee(${employee.id})">Delete</button>
+                    </td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+        })
+        .catch(error => {
+            console.error('Error updating employee table:', error);
+        });
+}
+
 </script>
 
     <div class="employee_form_container"> 
-      <h3>E m p l o y e e s</h3>
-      <hr width="100%" color="yellow" size="5">
+        <div class="header">
+            <div class="header-left">
+                <h3>Employee List</h3>
+            </div>
+            <div class="header-right">
+                <label for="selectLocation">Select Location :&nbsp</label>
+                <select id="selectLocation" name="selectLocation" <%= glbUserType !== 'admin' ? 'disabled' : '' %> onchange="updateEmployeeTable(this.value)">
+                    <% locations.forEach(location => { %>
+                        <option value="<%= location.id %>" 
+                            <%= location.location_name === glbLocaName ? 'selected' : '' %>>
+                            <%= location.location_name %>
+                        </option>
+                    <% }); %>
+                </select>
+            </div>
+
+        </div>
+      <!-- <hr width="100%" color="yellow" size="5"> -->
       <div class="employee-form-top">
         <div class="employee-form-top-left">
             <input type="text" onkeyup="filterTableFn()" id="searchFldFn" name="searchFldFn" placeholder="Search Employee on First Name">

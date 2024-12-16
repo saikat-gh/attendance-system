@@ -56,6 +56,7 @@ function myFunction() {
 const os = require('os');
 var glbLocaCode;
 var glbLocaName;
+var glbLocaAbbr;
 //var MacId
 var glbUserName;
 var glbUserType;
@@ -77,7 +78,8 @@ router.get('/', async(req, res) => {
 
     const userResult = await client.query('SELECT * FROM user_master order by username');
     const users = userResult.rows;
-
+    const locationResult = await client.query('SELECT * FROM location_master order by location_name');
+    const locations = locationResult.rows;
     res.render('login', { users });
   } catch (err) {
     console.error('Error executing query', err);
@@ -106,13 +108,79 @@ router.get('/get-location/:id', async (req, res) => {
   }
 });
 
-// Route to handle Attendance Entry Employee Selection
-router.get('/attendance/:key', async (req, res) => {
-  const locationId = req.params.key;
+// Route to handle Employee Selection For Photo Capture
+router.get('/employee-photo-capture/:key', async (req, res) => {
+  const locationAbbr = req.params.key;
   const client = await pool.connect();
   try {
-    const result1 = await client.query('SELECT location_name from location_master where id = $1', [locationId]);
-    const location_name = result1.rows;
+    const result1 = await client.query('SELECT id, location_name FROM location_master WHERE abbr = $1', [locationAbbr]);
+    const location = result1.rows[0]; // Get first row
+    const locationId = location.id;
+    const location_name = [location]; // Keep array format for compatibility
+    console.log(location_name);
+    const result2 = await client.query('SELECT id, fname, lname, fotourl FROM employee_master where location_id = $1 order by fname, lname', [locationId]);
+    const employees = result2.rows;
+    res.render('photo-capture-list', { employees, locationId, location_name, locationAbbr });
+  } catch (err) {
+    console.error('Error executing query', err);
+    res.status(500).send('Error fetching Employees');
+  } finally {
+    client.release();
+  }
+});
+// Route From photo-capture-list  to capture photo
+router.get('/photo-capture', async (req, res) => {
+  // Extract data from query parameters
+  const empId = req.query.empId; // Employee ID
+  const empName = JSON.parse(decodeURIComponent(req.query.empName)); // Row Data (parsed from JSON)
+  const location = req.query.location; // Location Name
+  const locationAbbr = req.query.locationAbbr; // Location Abbreviation
+  const client = await pool.connect();
+  try {
+    const result = await client.query('SELECT employee_master.fotourl, employee_master.location_id, location_master.lat, location_master.long FROM employee_master, location_master where employee_master.id = $1 and location_master.id = employee_master.location_id', [empId] );
+    const otherData = result.rows;
+    res.render('photo-capture', {empId, empName, location, locationAbbr, otherData });
+} catch (err) {
+    console.error('Error executing query', err);
+    res.status(500).send('Error fetching Other Data from Employees and Location');
+} finally {
+    client.release();
+}
+});
+//Submit Photo
+// Route to save Employee Photo
+router.post('/submit-photo', upload.single('photo'), async (req, res) => {
+  try {
+      console.log(`Inside Submit photo`) 
+      const { empid, locationAbbr } = req.body;
+      const photoUrl = req.file ? `/uploads/${req.file.filename}` : null;
+      console.log(`Photo url prepared`)
+      console.log('locationAbbr', locationAbbr);
+      // Save Employee Photo
+      const updateQuery = `
+          UPDATE employee_master SET fotourl = $1 WHERE id = $2
+      `;
+
+      await pool.query(updateQuery, [photoUrl, empid]);
+      console.log(`Employee Photo saved to database`)
+      // Send JSON response if requested via JavaScript
+      res.json({ success: true, redirectUrl: `/employee-photo-capture/${locationAbbr}` });
+
+  } catch (error) {
+      console.error('Error saving Photo:', error);
+      res.status(500).json({ error: 'Message from backend - An error occurred while saving Photo' });
+  }
+});
+
+// Route to handle Attendance Entry Employee Selection
+router.get('/attendance/:key', async (req, res) => {
+  const locationAbbr = req.params.key;
+  const client = await pool.connect();
+  try {
+    const result1 = await client.query('SELECT id, location_name from location_master where abbr = $1', [locationAbbr]);
+    const location = result1.rows[0]; // Get first row
+    const locationId = location.id;
+    const location_name = location.location_name;
     const result2 = await client.query('SELECT id, fname, lname, fotourl FROM employee_master where location_id = $1 order by fname, lname', [locationId]);
     const employees = result2.rows;
     res.render('attendance_list', { employees, locationId, location_name });
@@ -309,30 +377,34 @@ router.get('/get-location/:id', async (req, res) => {
 
 // Route to handle employee
 router.get('/employee', async (req, res) => {
-  if (glbUserType === 'admin') {
+  
     const client = await pool.connect();
     try {
-        const result = await client.query('SELECT * FROM employee_master order by fname, lname');
-        const employees = result.rows;
-        res.render('employee_list', { employees, glbUserName, glbLocaName, glbLocaCode, glbUserType });
+        const result1  = await client.query('SELECT * FROM location_master order by location_name');
+        const locations = result1.rows;
+        const result2 = await client.query('SELECT * FROM employee_master where location_id = $1 order by fname, lname', [glbLocaCode]);
+        const employees = result2.rows;
+        res.render('employee_list', { employees, locations, glbUserName, glbLocaName, glbLocaCode, glbUserType });
     } catch (err) {
         console.error('Error executing query', err);
         res.status(500).send('Error fetching Employees');
     } finally {
         client.release();
     }
-  } else {
-      const client = await pool.connect();
-    try {
-      const result = await client.query('SELECT * FROM employee_master where location_id = $1 order by fname, lname', [glbLocaCode]);
-      const employees = result.rows;
-      res.render('employee_list', { employees, glbUserName, glbLocaName, glbLocaCode, glbUserType });
-    } catch (err) {
-        console.error('Error executing query', err);
-        res.status(500).send('Error fetching Employees');
-    } finally {
-        client.release();
-    }
+});
+// Route to fetch employees by location from Employee_List.EJS
+router.get('/get-employees-by-location', async (req, res) => {
+  const locationId = req.query.locationId;
+  const client = await pool.connect();
+  try {
+      const employees = await client.query(
+          'SELECT id, fname, lname, fotourl FROM employee_master WHERE location_id = $1',
+          [locationId]
+      );
+      res.json(employees.rows); // Send employees as JSON
+  } catch (err) {
+      console.error('Error fetching employees:', err);
+      res.status(500).send('Failed to fetch employees');
   }
 });
 
@@ -450,7 +522,7 @@ router.post('/login', async (req, res) => {
   const client = await pool.connect();
   try {
     // Query to get user information by username
-    const userResult = await client.query('SELECT userid, username, userpwd, usertype, userlocation, location_master.location_name FROM user_master, location_master WHERE user_master.username = $1 and user_master.userlocation = location_master.id', [username]);
+    const userResult = await client.query('SELECT userid, username, userpwd, usertype, userlocation, location_master.location_name, location_master.abbr FROM user_master, location_master WHERE user_master.username = $1 and user_master.userlocation = location_master.id', [username]);
 // Check if user exists
     if (userResult.rows.length > 0) {
       const uname = userResult.rows[0]; 
@@ -468,6 +540,7 @@ router.post('/login', async (req, res) => {
         glbUserName = uname.username
         glbLocaCode = uname.userlocation
         glbLocaName = uname.location_name
+        glbLocaAbbr = uname.abbr
         glbUserType = uname.usertype
         res.redirect('/navbar');
       } else {
@@ -487,7 +560,7 @@ router.post('/login', async (req, res) => {
 });
 
 router.get('/navbar', (req, res) => {
-  res.render('menu', { glbUserName, glbLocaName, glbUserType, glbLocaCode});
+  res.render('menu', { glbUserName, glbLocaName, glbUserType, glbLocaCode, glbLocaAbbr});
 });
 
 // Route to list all Locations
@@ -497,7 +570,7 @@ router.get('/location', async (req, res) => {
     const result = await client.query('SELECT * FROM location_master order by location_name');
 //    console.log(result.rows);
     const locations = result.rows;
-    res.render('location_list', { locations, glbUserName, glbLocaName, glbLocaCode, glbUserType });
+    res.render('location_list', { locations, glbUserName, glbLocaName, glbLocaCode, glbUserType, glbLocaAbbr });
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).send('Error fetching Locations');
@@ -509,7 +582,7 @@ router.get('/location', async (req, res) => {
 
 // Route to handle Location Add Form Display request
 router.get('/location-add', (req, res) => {
-  res.render("location-add", { glbUserName, glbLocaName, glbLocaCode, glbUserType });
+  res.render("location-add", { glbUserName, glbLocaName, glbLocaCode, glbUserType, glbLocaAbbr });
 });
 
 // Route to handle Location Add request
@@ -520,7 +593,7 @@ router.post('/location-add', async (req, res) => {
     const { location_name, address1, address2, address3, abbr, lat, long } = req.body;
       // Insert data into the database
       const result = await client.query('INSERT INTO location_master (location_name, location_addr1, location_addr2, location_addr3, abbr, lat, long) VALUES ($1, $2, $3, $4, $5, $6, $7)', [location_name, address1, address2, address3, abbr, lat, long]);
-      res.render("location-add", { glbUserName, glbLocaName, glbLocaCode, glbUserType });
+      res.render("location-add", { glbUserName, glbLocaName, glbLocaCode, glbUserType, glbLocaAbbr });
   } catch (error) {
       console.error('Error inserting data:', error);
       res.status(500).send('Internal Server Error');
@@ -537,7 +610,7 @@ router.get('/location-edit', async(req, res) => {
     const result = await client.query('SELECT * FROM location_master WHERE id = $1', [locationId]);
     console.log(result.rows);
     const locations = result.rows;
-    res.render('location-edit', { locations, glbUserName, glbLocaName, glbLocaCode, glbUserType });
+    res.render('location-edit', { locations, glbUserName, glbLocaName, glbLocaCode, glbUserType, glbLocaAbbr });
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).send('Error fetching Locations');

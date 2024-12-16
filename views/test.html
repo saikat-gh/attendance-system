@@ -3,266 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-level Dropdown Nav</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        nav {
-            background: #333;
-            padding: 5px 20px;
-        }
-
-        ul {
-            list-style-type: none;
-        }
-
-        a {
-            color: white;
-            text-decoration: none;
-        }
-
-        .menu li {
-            font-size: 16px;
-            padding: 15px 5px;
-            white-space: nowrap;
-        }
-
-        .menu li a {
-            display: block;
-        }
-
-        /* Mobile menu */
-        .menu {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .toggle {
-            order: 1;
-            font-size: 20px;
-        }
-
-        .item {
-            width: 100%;
-            text-align: left;
-            order: 3;
-            display: none;
-        }
-
-        .item.active {
-            display: block;
-        }
-
-        /* Submenu up from mobile screens */
-        .submenu {
-            display: none;
-            background: #444;
-            position: absolute;
-            left: 0;
-            width: 100%;
-        }
-
-        .submenu-active > .submenu {
-            display: block;
-        }
-
-        .has-submenu > a::after {
-            font-family: "Font Awesome 5 Free";
-            font-size: 12px;
-            line-height: 16px;
-            font-weight: 900;
-            content: "\f078";
-            color: white;
-            padding-left: 5px;
-        }
-
-        .subitem a {
-            padding: 10px 15px;
-        }
-
-        /* Third level submenu */
-        .submenu .has-submenu .submenu {
-            left: 100%;
-            top: 0;
-            background: #555;
-            display: none;
-        }
-
-        .submenu .has-submenu:hover .submenu,
-        .submenu .has-submenu.submenu-active .submenu {
-            display: block;
-        }
-
-        /* Tablet menu */
-        @media all and (min-width: 700px) {
-            .menu {
-                justify-content: flex-start;
-            }
-
-            .toggle {
-                flex: 1;
-                text-align: right;
-                order: 2;
-            }
-        }
-
-        /* Desktop menu */
-        @media all and (min-width: 960px) {
-            .menu {
-                align-items: flex-start;     
-                flex-wrap: nowrap;
-                background: none;
-            }
-
-            .item {
-                order: 1;
-                position: relative;
-                display: block;
-                width: auto;
-            }
-
-            .toggle {
-                display: none;
-            }
-
-            .submenu {
-                position: absolute;
-                left: 0;
-                top: 100%;
-                width: 200px;
-            }
-
-            .submenu-active > .submenu {
-                display: block;
-                position: absolute;
-            }
-
-            .subitem a {
-                color: #fff;
-                padding: 10px 15px;
-            }
-
-            .submenu-active {
-                border-radius: 0;
-            }
-        }
-    </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+    <title>Document</title>
 </head>
 <body>
-    <nav>
-        <ul class="menu">
-            <li class="item"><a href="#">Home</a></li>
-            <li class="item has-submenu">
-                <a tabindex="0">Services</a>
-                <ul class="submenu">
-                    <li class="subitem"><a href="#">Design</a></li>
-                    <li class="subitem"><a href="#">Development</a></li>
-                    <li class="subitem"><a href="#">SEO</a></li>
-                </ul>
-            </li>
-            <li class="item has-submenu">
-                <a tabindex="0">Products</a>
-                <ul class="submenu">
-                    <li class="subitem has-submenu">
-                        <a tabindex="0">Product 1</a>
-                        <ul class="submenu">
-                            <li class="subitem"><a href="#">Feature 11</a></li>
-                            <li class="subitem"><a href="#">Feature 12</a></li>
-                            <li class="subitem"><a href="#">Feature 13</a></li>
-                        </ul>
-                    </li>
-                    <li class="subitem has-submenu">
-                        <a tabindex="0">Product 2</a>
-                        <ul class="submenu">
-                            <li class="subitem"><a href="#">Feature 21</a></li>
-                            <li class="subitem"><a href="#">Feature 22</a></li>
-                            <li class="subitem"><a href="#">Feature 23</a></li>
-                        </ul>
-                    </li>
-                    <li class="subitem has-submenu">
-                        <a tabindex="0">Product 3</a>
-                        <ul class="submenu">
-                            <li class="subitem"><a href="#">Feature 31</a></li>
-                            <li class="subitem"><a href="#">Feature 32</a></li>
-                            <li class="subitem"><a href="#">Feature 33</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </li>
-            <li class="item"><a href="#">About</a></li>
-            <li class="item"><a href="#">Contact</a></li>
-            <li class="toggle"><a href="#"><i class="fas fa-bars"></i></a></li>
-        </ul>
-    </nav>
+    <select class="state-select">
+	<option value="AP">Andhra Pradesh</option>
+	<option value="AR">Arunachal Pradesh</option>
+	<option value="AS">Assam</option>
+	<option value="BR">Bihar</option>
+	<option value="CT">Chhattisgarh</option>
+	<option value="GA">Gujarat</option>
+	<option value="HR">Haryana</option>
+	<option value="HP">Himachal Pradesh</option>
+	<option value="JK">Jammu and Kashmir</option>
+	<option value="GA">Goa</option>
+	<option value="JH">Jharkhand</option>
+	<option value="KA">Karnataka</option>
+	<option value="KL">Kerala</option>
+	<option value="MP">Madhya Pradesh</option>
+	<option value="MH">Maharashtra</option>
+    <option value="MN">Manipur</option>
+    <option value="ML">Meghalaya</option>
+	<option value="MZ">Mizoram</option>
+	<option value="NL">Nagaland</option>
+	<option value="OR">Odisha</option>
+	<option value="PB">Punjab</option>
+	<option value="RJ">Rajasthan</option>
+	<option value="SK">Sikkim</option>
+	<option value="TN">Tamil Nadu</option>
+	<option value="TG">Telangana</option>
+	<option value="TR">Tripura</option>
+	<option value="UT">Uttarakhand</option>
+	<option value="UP">Uttar Pradesh</option>
+	<option value="WB">West Bengal</option>
+	<option value="AN">Andaman and Nicobar Islands</option>
+	<option value="CH">Chandigarh</option>
+	<option value="DN">Dadra and Nagar Haveli</option>
+	<option value="DD">Daman and Diu</option>
+	<option value="DL">Delhi</option>
+	<option value="LD">Lakshadweep</option>
+	<option value="PY">Puducherry</option>
+</select>
+<input type="text" id="state-input" name="state-input" placeholder="State Name" readonly>
 
-    <script>
-        const toggle = document.querySelector(".toggle");
-        const menu = document.querySelector(".menu");
-        const items = document.querySelectorAll(".item");
-
-        /* Toggle mobile menu */
-        function toggleMenu() {
-            if (menu.classList.contains("active")) {
-                menu.classList.remove("active");
-                toggle.querySelector("a").innerHTML = "<i class='fas fa-bars'></i>";
-            } else {
-                menu.classList.add("active");
-                toggle.querySelector("a").innerHTML = "<i class='fas fa-times'></i>";
-            }
-        }
-
-        /* Activate Submenu */
-        function toggleItem(e) {
-            e.stopPropagation();
-            if (this.classList.contains("submenu-active")) {
-                this.classList.remove("submenu-active");
-            } else {
-                const parent = this.closest('.submenu');
-                if (parent) {
-                    parent.querySelectorAll('.submenu-active').forEach(item => {
-                        item.classList.remove("submenu-active");
-                    });
-                } else {
-                    items.forEach(item => {
-                        if (item !== this && item.classList.contains("submenu-active")) {
-                            item.classList.remove("submenu-active");
-                        }
-                    });
-                }
-                this.classList.add("submenu-active");
-            }
-        }
-
-        /* Event Listeners */
-        toggle.addEventListener("click", toggleMenu, false);
-        items.forEach(item => {
-            if (item.querySelector(".submenu")) {
-                item.addEventListener("click", toggleItem, false);
-            }
-        });
-
-        /* Add event listeners for third level menu */
-        const subitems = document.querySelectorAll(".subitem.has-submenu");
-        subitems.forEach(item => {
-            item.addEventListener("click", toggleItem, false);
-        });
-
-        /* Close Submenu From Anywhere */
-        document.addEventListener("click", (e) => {
-            if (!menu.contains(e.target)) {
-                menu.classList.remove("active");
-                items.forEach(item => {
-                    item.classList.remove("submenu-active");
-                });
-                toggle.querySelector("a").innerHTML = "<i class='fas fa-bars'></i>";
-            }
-        });
-    </script>
+<script>
+    const selectState = document.querySelector('.state-select');
+    const stateInput = document.querySelector('#state-input');
+    selectState.addEventListener('change', (event) => {
+        stateInput.value = event.target.value;
+    });
+</script>
 </body>
 </html>

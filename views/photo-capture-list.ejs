@@ -1,0 +1,118 @@
+<head></head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .photo-capture-list-form-container {
+            background-color: #ffefd5; /* Papaya whip background */
+            border: 1px solid #8b4513; /* Saddle brown border */
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            margin: 0 auto;
+            box-shadow: 0 2px 4px rgba(139,69,19,0.2); /* Brown shadow */
+        }
+        h2, h3, h4 {
+            text-align: center;
+            font-size: 1.2em;
+            color: #8b4513; /* Saddle brown text */
+        }
+        h2 {
+            margin-bottom: 0.5rem;
+        }
+        h3 {
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        h4 {
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        #employee_photo_capture_table {
+            width: 100%;
+            background-color: #fff5ee; /* Seashell background */
+        }
+        #employee_photo_capture_table th {
+            background-color: #d2691e; /* Chocolate header */
+            color: white;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            font-size: 1rem;
+            padding: 0.75rem;
+        }
+        #employee_photo_capture_table tr:hover td {
+            background-color: #ffe4c4; /* Bisque hover */
+            transition: background-color 0.2s ease;
+        }
+        #employee_photo_capture_table tr {
+            height: 3rem;
+        }
+        #employee_photo_capture_table, th, td {
+            border: 1px solid #deb887; /* Burlywood border */
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body class = "photo-capture-list-body">
+    <div class="photo-capture-list-form-container">
+        <h2> Employee Photo Capture </h3>
+        <h3> Select Employee </h3>
+        <h4> <%= location_name[0].location_name %> </h4>
+        <h4> <%= locationAbbr %> </h4>
+        <form class="employee_photo_capture_form">
+            <div class="employee_photo_capture_table_wrapper">
+                <table id="employee_photo_capture_table">
+                    <thead>
+                        <tr>
+                            <th width="100%">Employee Name</th>
+                        </tr>
+                    </thead>
+                        <% employees.forEach(employee => { %>
+                            <tr data-key = <%= employee.id %> >
+                                <td> <%= employee.fname %> <%= employee.lname %> </td>
+                            </tr>
+                        <% }); %>
+                </table>
+            </div>
+        </form>        
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Select the table element
+        const table = document.getElementById('employee_photo_capture_table');
+    
+        if (table) {
+            table.addEventListener('click', function (event) {
+                // Find the closest row
+                const row = event.target.closest('tr');
+    
+                if (row && row.dataset.key) {
+                    // Access the data-key attribute
+                    const empId = row.dataset.key;
+                    console.log("Data-key:", empId);
+    
+                    // Retrieve all cell data in the clicked row
+                    const empName = Array.from(row.children).map(cell => cell.textContent.trim());
+                    console.log("Row Data:", empName);
+    
+                    // Encode the cell data to pass in the URL
+                    const cellsEncoded = encodeURIComponent(JSON.stringify(empName));
+    
+                    // Get the location name from the <h4> tag
+                    const location = document.querySelector('h4').textContent.trim();
+                    console.log("Location:", location);
+    
+                    // Navigate to the next page
+                    window.location.href = `/photo-capture?empId=${empId}&empName=${cellsEncoded}&location=${encodeURIComponent(location)}&locationAbbr=<%= locationAbbr %>`;
+                } else {
+                    console.error("Row not found or missing data-key.");
+                }
+            });
+        } else {
+            console.error("Table with id 'employee_photo_capture_table' not found.");
+        }
+    });
+    </script>
+
+</body>

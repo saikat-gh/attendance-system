@@ -128,6 +128,7 @@
 
 .users_table tr {
     border-bottom: 1px solid #ddd;
+    height: 25px;
   }
 
 .users_table tr:hover td {
