@@ -11,7 +11,13 @@
             margin-left: 125px;
             margin-bottom: 10px;
         }
-
+        .disp-err > p {
+            color: red;
+            font-size: 1rem;
+            text-align: center;
+            font-weight: bold;
+            /*display: none;*/
+        }
     </style>
 </head>
 <body class="location-add-body">
@@ -40,7 +46,7 @@
                 </tr>
                 <tr>
                     <td><label for="abbr">Abbreviation</label></td>
-                    <td><input type="text" id="abbr" name="abbr" maxlength="10"></td>
+                    <td><input type="text" id="abbr" name="abbr" minlength="6" maxlength="6"></td>
                 </tr>
                 <tr>
                     <td><label for="lat">Latitude</label></td>
@@ -52,14 +58,65 @@
                 </tr>
             </table>
             <button id="btnLocation" type="button" onclick="getLocation(event)">Get Current Location Co-Ordinates</button></a>
+            <div id="disp-err" class="disp-err">
+                <p>Error Message</p>
+            </div>
             <div class="btnGroup">
-              <button class="btnSubmit" onClick="saveLocation()">Submit</button></a>
+              <button class="btnSubmit" id="btnSubmit" >Submit</button></a>
               <button class="btnReset" type="reset">Reset Data</button>
               <a href="/location"><button class="btnReturn" type="button">Return</button></a>
             </div>
         </form>
     </div>
     <script>
+        function showError(message) {
+            const errorDiv = document.querySelector('.disp-err');
+            const errorMessage = errorDiv.querySelector('p');
+            errorMessage.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            const errorDiv = document.querySelector('.disp-err');
+            errorDiv.style.display = 'none';
+        }
+
+        // When the page loads, ensure error is hidden
+        window.onload = function() {
+            hideError();
+        }
+        const submitBtn = document.getElementById('btnSubmit');
+        submitBtn.addEventListener('click', async (event) => {
+            event.preventDefault(); // Prevent default form submission
+
+            // Get the form element
+            const form = document.querySelector('form');
+            
+            // Create FormData from the form to capture all input fields
+            const formData = new FormData(form);
+            formData.append('source', 'add');
+
+            try {
+                const response = await fetch('/location-add', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    console.log('Location Data saved successfully');
+                    window.location.href = "/location-add";    
+                } else {
+                    console.log('Location Data saving failed');
+                    const data = await response.json(); // Parse JSON response instead of statusText
+                    console.log('Location Data saving failed:', data);
+                    showError(data.error || 'Failed to save location data');
+                }
+            } catch (error) {
+                console.error('Error during upload:', error);
+                showError('An error occurred while saving the location');
+            }
+        });
+    
     function getLocation(event) {
         event.preventDefault();
         if (navigator.geolocation) {

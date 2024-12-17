@@ -39,7 +39,7 @@
                 </tr>
                 <tr>
                     <td><label for="abbr">Abbreviation</label></td>
-                    <td><input type="text" id="abbr" name="abbr" maxlength="10" value = "<%= locations[0].abbr %>" required></td>
+                    <td><input type="text" id="abbr" name="abbr" minlength="6" maxlength="6" value = "<%= locations[0].abbr %>" required></td>
                 </tr>
                 <tr>
                     <td><label for="lat">Latitude</label></td>
@@ -71,6 +71,7 @@
                             abbr: document.getElementById('abbr').value,
                             lat: document.getElementById('lat').value,
                             long: document.getElementById('long').value,
+                            source: 'edit',
                         };
 
             // Send the data via fetch

@@ -26,6 +26,27 @@
             gap: 5px; /* Add spacing between containers */
             margin-top: 10px;
         }
+        .top-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 5px; /* Add spacing between containers */
+        }
+
+        .left-box, .right-box {
+            border: 1px solid black;
+            padding: 5px;
+            width: 100%;
+            height: 160px; /* Reduced from 250px */
+        }
+
+        .right-box {
+            padding: 5px; 
+            position: relative; 
+            width: 100%; 
+            display: flex;
+            flex-direction: column; 
+            
+        }
 
         .image img {
             width: 100%; 
@@ -198,15 +219,22 @@
         <h3> Photo Capture </h3>
         <h5> <%= empName %> </h5>
         <h5> <%= location %> </h5>
-        <h5> <%= locationAbbr %> </h5>
+        <!-- <h5> <%= locationAbbr %> </h5> -->
         <form class = "photo-submit-form">
             <div class="top-container">
-                <div class="date">
-                    <input type="text" id="curDate" readonly>
-                </div>
-                <div class="time">
-                    <input type="text" id="curTime" readonly>
-                </div>
+                <div class="left-box">
+                    <div class="image">
+                        <img src="<%= otherData[0].fotourl %>" alt="">
+                    </div>
+                </div>    
+                <div class="right-box">
+                    <div class="date">
+                        <input type="text" id="curDate" readonly>
+                    </div>
+                    <div class="time">
+                        <input type="text" id="curTime" readonly>
+                    </div>
+                </div>    
             </div>    
             <div class="mid-container">
                 &nbsp;

@@ -306,9 +306,9 @@ router.post('/submit-attendance', upload.single('photo'), async (req, res) => {
       // Check if the user is within 5 meters
       const distance = geolib.getDistance(userLocation, knownLocation);
       console.log(`Distance from base location calculated: ${distance}`)
-      if (distance > 5) {
+      if (distance > 10) {
           console.log(`Distance not within range`)
-          return res.status(400).json({ error: 'You are not within the required radius' });
+          return res.status(400).json({ error: 'Please be within the Attendance Area' });
       }
 
       // // code for image comparison
@@ -586,14 +586,29 @@ router.get('/location-add', (req, res) => {
 });
 
 // Route to handle Location Add request
-router.post('/location-add', async (req, res) => {
+router.post('/location-add', upload.none(), async (req, res) => {
   const client = await pool.connect();
-  try {
-    console.log(req.body)
-    const { location_name, address1, address2, address3, abbr, lat, long } = req.body;
+  const { location_name, address1, address2, address3, abbr, lat, long, source } = req.body;
+  console.log('Request body:', req.body);
+   try {
+    let recCnt = await client.query('SELECT COUNT(*) FROM location_master where abbr = $1', [abbr]);
+    recCnt = parseInt(recCnt.rows[0].count, 10);
+    console.log('Record count for', abbr || 'undefined', 'is', recCnt); // Better undefined handling
+    console.log('Source is', source);
+    let abbrOk = false;
+    if (recCnt === 0 && source === 'add') {
+      abbrOk = true;
+    } else if (recCnt <= 1 && source === 'edit') {
+      abbrOk = true;
+    } 
+    console.log('Abbreviation OK:', abbrOk);
+    if (abbrOk) {
       // Insert data into the database
       const result = await client.query('INSERT INTO location_master (location_name, location_addr1, location_addr2, location_addr3, abbr, lat, long) VALUES ($1, $2, $3, $4, $5, $6, $7)', [location_name, address1, address2, address3, abbr, lat, long]);
-      res.render("location-add", { glbUserName, glbLocaName, glbLocaCode, glbUserType, glbLocaAbbr });
+      res.redirect("/location-add");
+    } else {
+      res.status(400).json({ error: 'Duplicate Abbreviation Entered' });
+    }
   } catch (error) {
       console.error('Error inserting data:', error);
       res.status(500).send('Internal Server Error');
@@ -620,41 +635,54 @@ router.get('/location-edit', async(req, res) => {
 });
 
 // Route to handle the Location Update request
-router.put('/location-update', (req, res) => {
+router.put('/location-update', async(req, res) => {
   const locationId = req.query.id;
   if (!locationId) {
     return res.status(400).send('Location ID is required.');
   }
-  const { location_name, address1, address2, address3, abbr, lat, long } = req.body;
-  if (!location_name || !address1 || !address2 || !address3) {
-    return res.status(400).send('All address fields and name are required.');
+  const { location_name, address1, address2, address3, abbr, lat, long, source } = req.body;
+  if (!location_name || !abbr) {
+    return res.status(400).send('Location Name and Abbreviation are required.');
   }
+
   console.log("Inside Location update Route");
   console.log(req.body);
-  const sql = `
-    UPDATE location_master 
-    SET 
-      location_name = $1, 
-      location_addr1 = $2, 
-      location_addr2 = $3, 
-      location_addr3 = $4, 
-      abbr = $5,
-      lat = $6,
-      long = $7 
-    WHERE id = $8
-  `;
-  console.log(sql);
-  pool.query(sql, [location_name, address1, address2, address3, abbr, lat, long, locationId], (err, result) => {
-    if (err) {
-      console.error('Database error:', err);
-      return res.status(500).send('Error updating location.');
+  const client = await pool.connect();
+  try {
+    let recCnt = await client.query('SELECT COUNT(*) FROM location_master where abbr = $1', [abbr]);
+    recCnt = parseInt(recCnt.rows[0].count, 10);
+    console.log('Record count for', abbr || 'undefined', 'is', recCnt); // Better undefined handling
+    console.log('Source is', source);
+    let abbrOk = false;
+    if (recCnt === 0 && source === 'add') {
+      abbrOk = true;
+    } else if (recCnt <= 1 && source === 'edit') {
+      abbrOk = true;
+    } 
+    console.log('Abbreviation OK:', abbrOk);
+    if (abbrOk) {
+        const sql = `
+          UPDATE location_master 
+          SET 
+          location_name = $1, 
+          location_addr1 = $2, 
+          location_addr2 = $3, 
+          location_addr3 = $4, 
+          abbr = $5,
+          lat = $6,
+          long = $7 
+          WHERE id = $8
+          `;
+        console.log(sql);
+        const result = await client.query(sql, [location_name, address1, address2, address3, abbr, lat, long, locationId])
+    } else {
+      res.status(400).json({ error: 'Duplicate Abbreviation Entered' });
     }
-    if (result.rowCount === 0) {
-      return res.status(404).send('Location not found.');
-    }
-    res.status(200).send('Location updated successfully.');
+  } catch (error) {
+      console.error('Error inserting data:', error);
+      res.status(500).send('Internal Server Error');
+  }
   });
-});
 
 // Route to handle the Location Delete request
 router.delete('/location-delete', (req, res) => {
@@ -744,6 +772,7 @@ router.get('/generate-report', async (req, res) => {
     FROM attendance a
     JOIN employee_master e ON a.empid = e.id
     WHERE a.date BETWEEN $1 AND $2
+    AND e.location_id = $3
   )
   SELECT 
     date,
@@ -759,7 +788,7 @@ router.get('/generate-report', async (req, res) => {
 console.log('Executing attendance query...');
 const client = await pool.connect();
 try {
-    const result = await client.query(query, [startDate, endDate]);
+    const result = await client.query(query, [startDate, endDate, glbLocaCode]);
     console.log(`Query returned ${result.rows.length} attendance records`);
     console.log('Query Result:',result.rows);
 
