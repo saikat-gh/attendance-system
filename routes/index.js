@@ -5,6 +5,8 @@ const path = require('path');
 const geolib = require('geolib');
 require("dotenv").config();
 const { Pool } = require('pg');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const multerS3 = require('multer-s3');
 
 
 // PostgreSQL connection configuration
@@ -17,7 +19,31 @@ const pool = new Pool({
   logging: true
 });
 
-// Set up multer for image uploads
+// AWS S3 configuration
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION || 'ap-south-1',
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+  }
+});
+
+// S3 storage configuration
+const s3Storage = multerS3({
+  s3: s3Client,
+  bucket: process.env.AWS_BUCKET_NAME || 'your-bucket-name',
+  key: function (req, file, cb) {
+    // Generate unique filename
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'uploads/' + uniqueSuffix + '-' + file.originalname);
+  },
+  contentType: multerS3.AUTO_CONTENT_TYPE
+});
+
+// Create new upload middleware for S3
+const uploadToS3 = multer({ storage: s3Storage });
+
+// Keep the existing local storage upload middleware
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
       cb(null, 'uploads/'); // Save images in the 'uploads' folder
@@ -834,6 +860,26 @@ try {
 } finally {
    client.release();
 }
+});
+
+// For S3 storage (new)
+router.post('/submit-photo-s3', uploadToS3.single('photo'), async (req, res) => {
+  try {
+    const { empid, locationAbbr } = req.body;
+    const imageUrl = req.file ? req.file.location : null; // S3 URL is in location property
+    
+    // Save Employee Photo
+    const updateQuery = `
+        UPDATE employee_master SET fotourl = $1 WHERE id = $2
+    `;
+
+    await pool.query(updateQuery, [imageUrl, empid]);
+    
+    res.json({ success: true, redirectUrl: `/employee-photo-capture/${locationAbbr}` });
+  } catch (error) {
+    console.error('Error saving Photo:', error);
+    res.status(500).json({ error: 'An error occurred while saving Photo' });
+  }
 });
 
 module.exports = router;
