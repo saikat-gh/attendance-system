@@ -61,6 +61,12 @@
     </div>
 
     <script>
+        // Store the initial value of the "abbr" field on page load
+        document.addEventListener("DOMContentLoaded", () => {
+            const abbrInput = document.getElementById("abbr");
+            abbrInput.setAttribute("data-initial", abbrInput.value);
+        });
+
         function updateLocation(locationId) {
             // Collect form data
             const data = {
@@ -71,6 +77,7 @@
                             abbr: document.getElementById('abbr').value,
                             lat: document.getElementById('lat').value,
                             long: document.getElementById('long').value,
+                            initialAbbr: document.getElementById('abbr').getAttribute("data-initial"),
                             source: 'edit',
                         };
 

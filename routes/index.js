@@ -101,11 +101,10 @@ router.get('/', async(req, res) => {
    // const locations = locationResult.rows;
    // glbLocaCode = 11  // locations[0].id;
    // glbLocaName = "ISRO"  //locations[0].location_name;
-
     const userResult = await client.query('SELECT * FROM user_master order by username');
     const users = userResult.rows;
-    const locationResult = await client.query('SELECT * FROM location_master order by location_name');
-    const locations = locationResult.rows;
+    // const locationResult = await client.query('SELECT * FROM location_master order by location_name');
+    // const locations = locationResult.rows;
     res.render('login', { users });
   } catch (err) {
     console.error('Error executing query', err);
@@ -551,6 +550,7 @@ router.post('/login', async (req, res) => {
     const userResult = await client.query('SELECT userid, username, userpwd, usertype, userlocation, location_master.location_name, location_master.abbr FROM user_master, location_master WHERE user_master.username = $1 and user_master.userlocation = location_master.id', [username]);
 // Check if user exists
     if (userResult.rows.length > 0) {
+      console.log(userResult.rows);
       const uname = userResult.rows[0]; 
 
       if (password === uname.userpwd) {
@@ -666,7 +666,7 @@ router.put('/location-update', async(req, res) => {
   if (!locationId) {
     return res.status(400).send('Location ID is required.');
   }
-  const { location_name, address1, address2, address3, abbr, lat, long, source } = req.body;
+  const { location_name, address1, address2, address3, abbr, lat, long, initialAbbr,source } = req.body;
   if (!location_name || !abbr) {
     return res.status(400).send('Location Name and Abbreviation are required.');
   }
@@ -680,9 +680,9 @@ router.put('/location-update', async(req, res) => {
     console.log('Record count for', abbr || 'undefined', 'is', recCnt); // Better undefined handling
     console.log('Source is', source);
     let abbrOk = false;
-    if (recCnt === 0 && source === 'add') {
+    if (recCnt === 0 && initialAbbr != abbr) {
       abbrOk = true;
-    } else if (recCnt <= 1 && source === 'edit') {
+    } else if (recCnt === 1 && initialAbbr === abbr) {
       abbrOk = true;
     } 
     console.log('Abbreviation OK:', abbrOk);
@@ -701,6 +701,7 @@ router.put('/location-update', async(req, res) => {
           `;
         console.log(sql);
         const result = await client.query(sql, [location_name, address1, address2, address3, abbr, lat, long, locationId])
+        res.json({ success: true, redirectUrl: `/location` });
     } else {
       res.status(400).json({ error: 'Duplicate Abbreviation Entered' });
     }
