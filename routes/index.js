@@ -130,6 +130,8 @@ router.get('/get-location/:id', async (req, res) => {
   } catch (error) {
       console.error('Error fetching location:', error);
       res.status(500).json({ success: false, message: 'Server error.' });
+  } finally {
+    client.release();
   }
 });
 
@@ -156,12 +158,13 @@ router.get('/employee-photo-capture/:key', async (req, res) => {
 // Route From photo-capture-list  to capture photo
 router.get('/photo-capture', async (req, res) => {
   // Extract data from query parameters
+  try {
   const empId = req.query.empId; // Employee ID
   const empName = JSON.parse(decodeURIComponent(req.query.empName)); // Row Data (parsed from JSON)
   const location = req.query.location; // Location Name
   const locationAbbr = req.query.locationAbbr; // Location Abbreviation
   const client = await pool.connect();
-  try {
+  
     const result = await client.query('SELECT employee_master.fotourl, employee_master.location_id, location_master.lat, location_master.long FROM employee_master, location_master where employee_master.id = $1 and location_master.id = employee_master.location_id', [empId] );
     const otherData = result.rows;
     res.render('photo-capture', {empId, empName, location, locationAbbr, otherData });
@@ -199,9 +202,10 @@ router.post('/submit-photo', upload.single('photo'), async (req, res) => {
 
 // Route to handle Attendance Entry Employee Selection
 router.get('/attendance/:key', async (req, res) => {
+  try {
   const locationAbbr = req.params.key;
   const client = await pool.connect();
-  try {
+  
     const result1 = await client.query('SELECT id, location_name from location_master where abbr = $1', [locationAbbr]);
     const location = result1.rows[0]; // Get first row
     const locationId = location.id;
@@ -239,12 +243,13 @@ router.get('/attendance-submit/:key', async(req, res) => {
 
 // Route From Attendance_List.EJS to capture Attendance
 router.get('/attendance-capture', async (req, res) => {
+  try {
   // Extract data from query parameters
   const empId = req.query.empId; // Employee ID
   const empName = JSON.parse(decodeURIComponent(req.query.empName)); // Row Data (parsed from JSON)
   const location = req.query.location; // Location Name
   const client = await pool.connect();
-  try {
+  
     const result = await client.query('SELECT employee_master.fotourl, employee_master.location_id, location_master.lat, location_master.long FROM employee_master, location_master where employee_master.id = $1 and location_master.id = employee_master.location_id', [empId] );
     const otherData = result.rows;
     res.render('attendance-capture', {empId, empName, location, otherData });
@@ -397,6 +402,8 @@ router.get('/get-location/:id', async (req, res) => {
   } catch (err) {
       console.error(err);
       res.status(500).json({ error: 'Server error' });
+  } finally {
+      client.release();
   }
 });
 
@@ -430,6 +437,8 @@ router.get('/get-employees-by-location', async (req, res) => {
   } catch (err) {
       console.error('Error fetching employees:', err);
       res.status(500).send('Failed to fetch employees');
+  } finally {
+    client.release();
   }
 });
 
@@ -451,32 +460,39 @@ router.get('/employee-add', async(req, res) => {
 // POST route to handle Employee Add form submission
 router.post('/employee-add', upload.single('image'), async(req, res) => {
   const client = await pool.connect();
-  const { location_name, fname, lname, addr1, addr2, city, state, pincode, mobile, email, esino, uanno } = req.body;
+  try {
+    const { location_name, fname, lname, addr1, addr2, city, state, pincode, mobile, email, esino, uanno } = req.body;
 
-   let imageUrl = null;
-   if (req.file) {
-      imageUrl = `/uploads/${req.file.filename}`; // Construct the image URL
+    let imageUrl = null;
+    if (req.file) {
+        imageUrl = `/uploads/${req.file.filename}`; // Construct the image URL
+    }
+    // Query to get Location ID from Location_Master
+    const result = await client.query('SELECT id FROM location_master WHERE location_name = $1', [location_name]);
+    const location = result.rows[0]; 
+    // Insert data into the database 
+    const query = `INSERT INTO employee_master (fname, lname, addr1, addr2, city, state, pincode, mobile, email, esino, uanno, fotourl, location_id)
+                   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`;
+    const values = [fname, lname, addr1, addr2, city, state, pincode, mobile, email, esino, uanno, imageUrl, location.id];
+    client.query(query, values, async (err, result) => {
+        if (err) {
+            console.error('Error inserting data:', err);
+            res.status(500).send('Error saving Employee Data');
+        } else {
+          console.log("From POST Route -> Redirecting to Employee Add Form");
+          const result = await client.query('SELECT * FROM location_master order by location_name');
+          const locations = result.rows;
+          console.log(locations);
+          res.render("employee-add",  { locations, glbUserName, glbLocaName, glbLocaCode, glbUserType });
+          // res.render("employee-add", { glbUserName, glbLocaName, glbLocaCode });
+        }
+    });
+  } catch (error) {
+    console.error('Error in employee-add route:', error);
+    res.status(500).send('An error occurred while adding employee');
+  } finally {
+    client.release();
   }
-  // Query to get Location ID from Location_Master
-  const result = await client.query('SELECT id FROM location_master WHERE location_name = $1', [location_name]);
-  const location = result.rows[0]; 
-  // Insert data into the database 
-  const query = `INSERT INTO employee_master (fname, lname, addr1, addr2, city, state, pincode, mobile, email, esino, uanno, fotourl, location_id)
-                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`;
-  const values = [fname, lname, addr1, addr2, city, state, pincode, mobile, email, esino, uanno, imageUrl, location.id];
-  client.query(query, values, async (err, result) => {
-      if (err) {
-          console.error('Error inserting data:', err);
-          res.status(500).send('Error saving Employee Data');
-      } else {
-        console.log("From POST Route -> Redirecting to Employee Add Form");
-        const result = await client.query('SELECT * FROM location_master order by location_name');
-      const locations = result.rows;
-      console.log(locations);
-    res.render("employee-add",  { locations, glbUserName, glbLocaName, glbLocaCode, glbUserType });
-        // res.render("employee-add", { glbUserName, glbLocaName, glbLocaCode });
-      }
-  });
 });
 
 // Route to handle the Employee Edit request
@@ -529,16 +545,16 @@ router.put('/employee-update', upload.single('image'), async (req, res) => {
 });
 
 // Route to handle the Location Delete request
-router.delete('/employee-delete', (req, res) => {
+router.delete('/employee-delete', async (req, res) => {
   const empId = req.query.id;
-  // Perform delete operation in the database
-  pool.query('DELETE FROM employee_master WHERE id = $1', [empId], (err, result) => {
-      if (err) {
-          console.error(err);
-          return res.status(500).send('Error deleting Employee.');
-      }
-      res.status(200).send('Employee deleted successfully.');
-  });
+  try {
+    // Perform delete operation in the database
+    await pool.query('DELETE FROM employee_master WHERE id = $1', [empId]);
+    res.status(200).send('Employee deleted successfully.');
+  } catch (error) {
+    console.error('Error deleting employee:', error);
+    res.status(500).send('Error deleting Employee.');
+  }
 });
 
 // POST Route to handle Login Form submission
@@ -585,8 +601,13 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.get('/navbar', (req, res) => {
-  res.render('menu', { glbUserName, glbLocaName, glbUserType, glbLocaCode, glbLocaAbbr});
+router.get('/navbar', async (req, res) => {
+  try {
+    res.render('menu', { glbUserName, glbLocaName, glbUserType, glbLocaCode, glbLocaAbbr });
+  } catch (error) {
+    console.error('Error rendering menu page:', error);
+    res.status(500).send('Error loading menu page');
+  }
 });
 
 // Route to list all Locations
@@ -607,16 +628,22 @@ router.get('/location', async (req, res) => {
 
 
 // Route to handle Location Add Form Display request
-router.get('/location-add', (req, res) => {
-  res.render("location-add", { glbUserName, glbLocaName, glbLocaCode, glbUserType, glbLocaAbbr });
+router.get('/location-add', async (req, res) => {
+  try {
+    res.render("location-add", { glbUserName, glbLocaName, glbLocaCode, glbUserType, glbLocaAbbr });
+  } catch (error) {
+    console.error('Error rendering location-add page:', error);
+    res.status(500).send('Error loading location add page');
+  }
 });
 
 // Route to handle Location Add request
 router.post('/location-add', upload.none(), async (req, res) => {
+  try {
   const client = await pool.connect();
   const { location_name, address1, address2, address3, abbr, lat, long, source } = req.body;
   console.log('Request body:', req.body);
-   try {
+ 
     let recCnt = await client.query('SELECT COUNT(*) FROM location_master where abbr = $1', [abbr]);
     recCnt = parseInt(recCnt.rows[0].count, 10);
     console.log('Record count for', abbr || 'undefined', 'is', recCnt); // Better undefined handling
@@ -638,16 +665,19 @@ router.post('/location-add', upload.none(), async (req, res) => {
   } catch (error) {
       console.error('Error inserting data:', error);
       res.status(500).send('Internal Server Error');
+  } finally {
+    client.release();
   }
 });
 
 // Route to handle the Location Edit request
 router.get('/location-edit', async(req, res) => {
+  try {
   const locationId = req.query.id;
   console.log(`From Backend Route - Editing location ${locationId}`);
   // Fetch location details from the database based on locationId
   const client = await pool.connect();
-  try {
+  
     const result = await client.query('SELECT * FROM location_master WHERE id = $1', [locationId]);
     console.log(result.rows);
     const locations = result.rows;
@@ -662,6 +692,7 @@ router.get('/location-edit', async(req, res) => {
 
 // Route to handle the Location Update request
 router.put('/location-update', async(req, res) => {
+  try {
   const locationId = req.query.id;
   if (!locationId) {
     return res.status(400).send('Location ID is required.');
@@ -674,7 +705,7 @@ router.put('/location-update', async(req, res) => {
   console.log("Inside Location update Route");
   console.log(req.body);
   const client = await pool.connect();
-  try {
+  
     let recCnt = await client.query('SELECT COUNT(*) FROM location_master where abbr = $1', [abbr]);
     recCnt = parseInt(recCnt.rows[0].count, 10);
     console.log('Record count for', abbr || 'undefined', 'is', recCnt); // Better undefined handling
@@ -708,21 +739,39 @@ router.put('/location-update', async(req, res) => {
   } catch (error) {
       console.error('Error inserting data:', error);
       res.status(500).send('Internal Server Error');
+  } finally {
+    client.release();
   }
-  });
+});
 
 // Route to handle the Location Delete request
 router.delete('/location-delete', (req, res) => {
   const locationId = req.query.id;
   console.log("Inside Delete Route");
-  // Perform delete operation in the database
-  pool.query('DELETE FROM location_master WHERE id = $1', [locationId], (err, result) => {
+  
+  try {
+    if (!locationId) {
+      return res.status(400).send('Location ID is required');
+    }
+
+    // Perform delete operation in the database
+    pool.query('DELETE FROM location_master WHERE id = $1', [locationId], (err, result) => {
       if (err) {
-          console.error(err);
-          return res.status(500).send('Error deleting location.');
+        console.error('Error deleting location:', err);
+        return res.status(500).send('Error deleting location.');
       }
+      
+      if (result.rowCount === 0) {
+        return res.status(404).send('Location not found');
+      }
+
       res.status(200).send('Location deleted successfully.');
-  });
+    });
+
+  } catch (error) {
+    console.error('Error in delete route:', error);
+    res.status(500).send('Internal server error');
+  }
 });
 
 router.get('/users-add', async (req, res) => {
@@ -752,11 +801,18 @@ router.post('/users-add', async (req, res) => {
   } catch (error) {
       console.error('Error inserting data:', error);
       res.status(500).send('Internal Server Error');
+  } finally {
+    client.release();
   }
 });
 
-router.get("/login" , (req, res) => {
-  res.render("login");
+router.get("/login", async (req, res) => {
+  try {
+    res.render("login");
+  } catch (error) {
+    console.error('Error rendering login page:', error);
+    res.status(500).send('Error loading login page');
+  }
 });
 
 router.get("/users", async (req, res) => {
@@ -774,11 +830,17 @@ router.get("/users", async (req, res) => {
   }
 })
 
-router.get("/rptDatewiseAttendance" , (req, res) => {
-  res.render("rpt-datewise-attendance",{ glbUserType, glbUserName, glbLocaName, glbLocaCode });
+router.get("/rptDatewiseAttendance", async (req, res) => {
+  try {
+    res.render("rpt-datewise-attendance", { glbUserType, glbUserName, glbLocaName, glbLocaCode });
+  } catch (error) {
+    console.error('Error rendering attendance report page:', error);
+    res.status(500).send('Error loading attendance report page');
+  }
 });
 
 router.get('/generate-report', async (req, res) => {
+  try {
   const { startDate, endDate } = req.query;
   console.log(`Generating attendance report for date range: ${startDate} to ${endDate}`);
 
@@ -814,7 +876,7 @@ router.get('/generate-report', async (req, res) => {
 
 console.log('Executing attendance query...');
 const client = await pool.connect();
-try {
+
     const result = await client.query(query, [startDate, endDate, glbLocaCode]);
     console.log(`Query returned ${result.rows.length} attendance records`);
     console.log('Query Result:',result.rows);
@@ -883,4 +945,7 @@ router.post('/submit-photo-s3', uploadToS3.single('photo'), async (req, res) => 
   }
 });
 
-module.exports = router;
+module.exports = { 
+  router: router,  // Export the router
+  pool: pool       // Export the pool
+};
