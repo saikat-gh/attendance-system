@@ -96,13 +96,16 @@
             border: 1px solid black; /* Match video border */
             box-shadow: 0 0 10px 5px rgba(0, 0, 0, 0.3); /* Match video shadow */
         }
-        .camera-btn-grp, .btn-grp {
+        .btn-grp {
             display: flex;
             justify-content: space-between;
             gap: 10px;
             flex-wrap: wrap;
         }
         .camera-btn-grp {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
             margin-top: 10px;
         }
         button {
@@ -134,7 +137,10 @@
             background-color: red;
             color: white;
         }
-
+        #toggle-btn {
+            background-color: rgb(245, 161, 5);
+            color: white;
+        }
         @media (max-width: 480px) {
             h3, h5 {
                 font-size: 16px;
@@ -224,7 +230,7 @@
             <div class="top-container">
                 <div class="left-box">
                     <div class="image">
-                        <img src="<%= otherData[0].fotourl %>" alt="">
+                        <img id="empPhoto"src="<%= otherData[0].fotourl %>" alt="">
                     </div>
                 </div>    
                 <div class="right-box">
@@ -246,12 +252,13 @@
                     <div class="guide-text">Please position your face within the square</div>
                     <div class="camera-btn-grp">
                         <button id="start-btn" name="start-btn" type="button">Start Camera</button>
+                        <button id="toggle-btn" name="toggle-btn" type="button">Toggle Camera</button>   
                         <button id="capture-btn" name="capture-btn" type="button">Capture Photo</button>
                     </div>       
                     <canvas id="canvas" style="display: none;"></canvas>
                 </div>
                 <div class="btn-grp">
-                    <button id="submit-btn" name="submit-btn" type="button">Submit</button>           
+                    <button id="submit-btn" name="submit-btn" type="button">Submit</button>   
                     <button id="cancel-btn" name="cancel-btn" type="button">Cancel</button>           
                 </div>
             </div>
@@ -261,6 +268,11 @@
         
         // Get the current date
         const currentDate = new Date();
+        // Default to front camera
+        //let facingMode = 'user'; 
+
+        // Default Back Camera
+        let facingMode = 'environment'; 
 
         // Helper function to format the date
         function formatDate(date) {
@@ -303,6 +315,8 @@
         const canvas = document.getElementById('canvas'); // The canvas element
         const startBtn = document.getElementById('start-btn'); // Start camera button
         const captureBtn = document.getElementById('capture-btn'); // Capture photo button
+        const toggleBtn = document.getElementById('toggle-btn'); // Toggle photo button
+        const cancelBtn = document.getElementById('cancel-btn'); // Cancel photo button
         const faceGuide = document.querySelector('.face-guide');
         const guideText = document.querySelector('.guide-text');
 
@@ -312,7 +326,10 @@
         startBtn.addEventListener('click', async () => {
         try {
             // Request camera access
-            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            //stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: facingMode },
+            });
             video.srcObject = stream; // Set the video feed
             video.play(); // Start the video playback
             video.style.display = 'block'; // Ensure the video is visible
@@ -325,28 +342,58 @@
         }
         });
 
-        // 2. Capture Photo
+        toggleBtn.addEventListener('click', async () => {
+            // Toggle facing mode
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+
+            // Toggle between 'user' and 'environment'
+            facingMode = facingMode === 'user' ? 'environment' : 'user';
+
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: facingMode },
+                });
+                video.srcObject = stream;
+                console.log(`Switched to ${facingMode} camera`);
+            } catch (error) {
+                console.error('Error switching cameras:', error);
+            }
+            });
+            
+        
+        cancelBtn.addEventListener('click', async () => {
+            window.history.back();;
+        })
+
+// 2. Capture Photo
         captureBtn.addEventListener('click', async () => {
         if (!stream) {
             showError('No video stream available!');
         return;
         }
-
+        const capturedImg = document.getElementById('empPhoto')
         // Draw the current frame from the video onto the canvas
         const context = canvas.getContext('2d');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Display the captured image in the img tag
+        const imageDataUrl = canvas.toDataURL('image/png');
+        capturedImg.src = imageDataUrl;
+        capturedImg.style.display = 'block'; // Show the image
 
         // Stop the video stream
-    const tracks = stream.getTracks();
-    tracks.forEach((track) => track.stop());
+        const tracks = stream.getTracks();
+        tracks.forEach((track) => track.stop());
 
     // Hide the video and show the canvas
-    video.style.display = 'none';
-    canvas.style.display = 'block';
-    faceGuide.style.display = 'none';
-    guideText.style.display = 'none';
+        video.style.display = 'none';
+        canvas.style.display = 'block';
+        faceGuide.style.display = 'none';
+        guideText.style.display = 'none';
 
 });
 

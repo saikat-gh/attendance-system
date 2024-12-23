@@ -420,6 +420,7 @@
         const canvas = document.getElementById('canvas'); // The canvas element
         const startBtn = document.getElementById('start-btn'); // Start camera button
         const captureBtn = document.getElementById('capture-btn'); // Capture photo button
+        const cancelBtn = document.getElementById('cancel-btn'); // Capture photo button
         const faceGuide = document.querySelector('.face-guide');
         const guideText = document.querySelector('.guide-text');
 
@@ -441,6 +442,10 @@
         } catch (error) {
             console.error('Error accessing the camera:', error);
         }
+        });
+
+        cancelBtn.addEventListener('click', async () => {
+            window.history.back();;
         });
 
         // 2. Capture Photo
@@ -528,7 +533,7 @@ function clearError() {
             formData.append('latitude', document.getElementById('curLat').value);
             formData.append('longitude', document.getElementById('curLong').value);
             formData.append('location_id', '<%= otherData[0].location_id %>');
-
+            formData.append('location_abbr', '<%= locationAbbr %>');
             // Add the photo if captured
             const canvas = document.getElementById('canvas');
             canvas.toBlob((blob) => {

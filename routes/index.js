@@ -208,7 +208,7 @@ router.get('/attendance/:key', async (req, res) => {
     const location_name = location.location_name;
     const result2 = await client.query('SELECT id, fname, lname, fotourl FROM employee_master where location_id = $1 order by fname, lname', [locationId]);
     const employees = result2.rows;
-    res.render('attendance_list', { employees, locationId, location_name });
+    res.render('attendance_list', { employees, locationId, location_name, locationAbbr });
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).send('Error fetching Employees');
@@ -243,11 +243,12 @@ router.get('/attendance-capture', async (req, res) => {
   const empId = req.query.empId; // Employee ID
   const empName = JSON.parse(decodeURIComponent(req.query.empName)); // Row Data (parsed from JSON)
   const location = req.query.location; // Location Name
+  const locationAbbr = req.query.locationAbbr; // Location Abbreviation
   const client = await pool.connect();
   try {
     const result = await client.query('SELECT employee_master.fotourl, employee_master.location_id, location_master.lat, location_master.long FROM employee_master, location_master where employee_master.id = $1 and location_master.id = employee_master.location_id', [empId] );
     const otherData = result.rows;
-    res.render('attendance-capture', {empId, empName, location, otherData });
+    res.render('attendance-capture', {empId, empName, location, locationAbbr, otherData });
 } catch (err) {
     console.error('Error executing query', err);
     res.status(500).send('Error fetching Other Data from Employees and Location');
@@ -309,7 +310,7 @@ router.post('/compare-face', uploadFaceCompute.single('photo'), async (req, res)
 router.post('/submit-attendance', upload.single('photo'), async (req, res) => {
   try {
       console.log(`Inside Submit attendance`) 
-      const { date, time, empid, latitude, longitude, location_id } = req.body;
+      const { date, time, empid, latitude, longitude, location_id, location_abbr } = req.body;
       const photoUrl = req.file ? `/uploads/${req.file.filename}` : null;
       console.log(`Photo url prepared`)
       // Get the location coordinates from location_master
@@ -371,7 +372,7 @@ router.post('/submit-attendance', upload.single('photo'), async (req, res) => {
         // }
 
         // Send JSON response if requested via JavaScript
-        res.json({ success: true, redirectUrl: `/attendance/${location_id}` });
+        res.json({ success: true, redirectUrl: `/attendance/${location_abbr}` });
 
       // Redirect to /attendance/:key with the location_id
       //res.redirect(/attendance/${location_id});
@@ -471,7 +472,7 @@ router.post('/employee-add', upload.single('image'), async(req, res) => {
       } else {
         console.log("From POST Route -> Redirecting to Employee Add Form");
         const result = await client.query('SELECT * FROM location_master order by location_name');
-      const locations = result.rows;
+        const locations = result.rows;
       console.log(locations);
     res.render("employee-add",  { locations, glbUserName, glbLocaName, glbLocaCode, glbUserType });
         // res.render("employee-add", { glbUserName, glbLocaName, glbLocaCode });
@@ -774,12 +775,22 @@ router.get("/users", async (req, res) => {
   }
 })
 
-router.get("/rptDatewiseAttendance" , (req, res) => {
-  res.render("rpt-datewise-attendance",{ glbUserType, glbUserName, glbLocaName, glbLocaCode });
+router.get("/rptDatewiseAttendance" , async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const result = await client.query('SELECT * FROM location_master order by location_name');
+    const locations = result.rows;
+    res.render("rpt-datewise-attendance",{ glbUserType, glbUserName, glbLocaName, glbLocaCode, locations });
+  } catch (err) {
+    console.error('Error executing query', err);
+    res.status(500).send('Error fetching Locations');
+  } finally {
+    client.release();
+  }
 });
 
 router.get('/generate-report', async (req, res) => {
-  const { startDate, endDate } = req.query;
+  const { startDate, endDate, locationId } = req.query;
   console.log(`Generating attendance report for date range: ${startDate} to ${endDate}`);
 
   if (!startDate || !endDate) {
@@ -815,7 +826,10 @@ router.get('/generate-report', async (req, res) => {
 console.log('Executing attendance query...');
 const client = await pool.connect();
 try {
-    const result = await client.query(query, [startDate, endDate, glbLocaCode]);
+    const locationData = await client.query('SELECT location_name from location_master WHERE id = $1', [locationId]);
+    const locationName = locationData.rows[0]; 
+    const location_name = locationName.location_name
+    const result = await client.query(query, [startDate, endDate, locationId]);
     console.log(`Query returned ${result.rows.length} attendance records`);
     console.log('Query Result:',result.rows);
 
@@ -852,7 +866,7 @@ try {
    res.render('scr-datewise-attendance', { 
        startDate, 
        endDate, 
-       glbLocaName, 
+       location_name, 
        reportData: groupedData 
    });
 } catch (error) {
