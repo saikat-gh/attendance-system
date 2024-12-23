@@ -96,10 +96,10 @@
     
                     // Get the location name from the <h4> tag
                     const location = document.querySelector('h4').textContent.trim();
-                    console.log("Location:", location);
-    
+                    const locationAbbr = "<%= locationAbbr %>";
+                                           
                     // Navigate to the next page
-                    window.location.href = `/attendance-capture?empId=${empId}&empName=${cellsEncoded}&location=${encodeURIComponent(location)}`;
+                    window.location.href = `/attendance-capture?empId=${empId}&empName=${cellsEncoded}&location=${encodeURIComponent(location)}&locationAbbr=${locationAbbr}`;
                 } else {
                     console.error("Row not found or missing data-key.");
                 }

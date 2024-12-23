@@ -73,7 +73,7 @@
         }
         function updateEmployeeTable(locationId) {
     // Fetch employees for the selected location
-    fetch(`/get-employees-by-location?locationId=${locationId}`)
+        fetch(`/get-employees-by-location?locationId=${locationId}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('Failed to fetch employees');

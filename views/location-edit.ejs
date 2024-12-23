@@ -10,8 +10,15 @@
             border-radius: 5px;
             margin-left: 125px;
             margin-bottom: 10px;
+           
         }
-
+        .disp-error > p {
+			color: red;
+			margin-top: 5px;
+			font-size: 14px;
+			font-weight: bold;
+			text-align: center;
+		}
     </style>
 </head>
 <body class="location-edit-body">
@@ -52,6 +59,9 @@
 
             </table>
             <button id="btnLocation" type="button" onclick="getLocation(event)">Get Current Location Co-Ordinates</button></a>
+            <div id="disp-error" class="disp-error">
+                <p>&nbsp;</p>
+            </div>
             <div class="btnGroup">
               <button class="btnSubmit" type="button" onClick="updateLocation(<%= locations[0].id %>)">Submit</button>
               <button class="btnReset" type="reset">Reset Data</button>
@@ -67,6 +77,26 @@
             abbrInput.setAttribute("data-initial", abbrInput.value);
         });
 
+        function showError(message) {
+            const errorDiv = document.querySelector('.disp-error');
+            const errorMessage = errorDiv.querySelector('p');
+            errorMessage.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            const errorDiv = document.querySelector('.disp-error');
+            errorDiv.style.display = 'none';
+        }
+
+        // When the page loads, ensure error is hidden
+        window.onload = function() {
+            const errorDiv = document.querySelector('.disp-error');
+            const errorMessage = errorDiv.querySelector('p');
+            errorMessage.textContent = "";
+            errorDiv.style.display = '&nbsp;'
+            //hideError();
+        }
         function updateLocation(locationId) {
             // Collect form data
             const data = {
@@ -91,7 +121,8 @@
             })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Failed to update location details');
+                    const errorData = response.json();
+                    throw new Error(errorData.error || 'Failed to update location details');
                 }
                 return response.text();
             })
@@ -100,7 +131,10 @@
                 // Redirect on success
                 window.location.href = "/location";
             })
-            .catch(error => console.error('Error updating location:', error));
+            .catch(error => {
+            // Display error message in the disp-error element
+            showError(error.message);
+            });
         }    
 
         function getLocation(event) {
