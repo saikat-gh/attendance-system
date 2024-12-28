@@ -7,6 +7,8 @@ require("dotenv").config();
 const { Pool } = require('pg');
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const multerS3 = require('multer-s3');
+const { spawn } = require('child_process');
+const fs = require('fs').promises;
 
 
 // PostgreSQL connection configuration
@@ -16,7 +18,17 @@ const pool = new Pool({
   database: process.env.PGDatabase,
   password: process.env.PGPassword,
   port: process.env.PGPort,
-  logging: true
+  logging: true,
+  // Add pool management configurations
+  max: 20, // Maximum number of clients in the pool
+  idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
+  connectionTimeoutMillis: 2000, // Return an error after 2 seconds if connection could not be established
+  maxUses: 7500 // Close a connection after it has been used 7500 times
+});
+
+// Add error handling for the pool
+pool.on('error', (err, client) => {
+  console.error('Unexpected error on idle client', err);
 });
 
 // AWS S3 configuration
@@ -46,15 +58,20 @@ const uploadToS3 = multer({ storage: s3Storage });
 // Keep the existing local storage upload middleware
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-      cb(null, 'uploads/'); // Save images in the 'uploads' folder
+    cb(null, 'uploads/');
   },
   filename: function (req, file, cb) {
-      // cb(null, Date.now() + path.extname(file.originalname)+".jpg"); // Unique file names
-      cb(null, Date.now() + path.extname(file.originalname)); // Unique file names
+    cb(null, Date.now() + path.extname(file.originalname));
   }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ 
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB file size limit
+    files: 1 // Only allow 1 file per request
+  }
+});
 
 // Set up multer for image uploads
 const storageFaceCompute = multer.diskStorage({
@@ -92,6 +109,62 @@ var glbUserType;
 //   MacId = networkInterfaces[interface][0].mac;
 //   break;
 // };
+
+// Constants adjusted for t2.micro container
+const MAX_PARALLEL_PROCESSES = 2;
+const MEMORY_THRESHOLD = 80; // percentage
+const PROCESS_TIMEOUT = 15000; // 15 seconds
+
+// Track active processes
+let activeProcesses = 0;
+
+// Function to get container memory stats
+async function getContainerStats() {
+    try {
+        const stats = process.memoryUsage();
+        const rss = stats.rss / 1024 / 1024; // Convert to MB
+        const heapUsed = stats.heapUsed / 1024 / 1024;
+        
+        // Container memory limit (from Docker settings)
+        const containerLimit = 640; // MB (as per Docker --memory setting)
+        const memoryUsagePercent = (rss / containerLimit) * 100;
+
+        return {
+            memoryUsageMB: Math.round(rss),
+            heapUsedMB: Math.round(heapUsed),
+            memoryUsagePercent: Math.round(memoryUsagePercent),
+            containerLimitMB: containerLimit
+        };
+    } catch (error) {
+        console.error('Error getting container stats:', error);
+        throw error;
+    }
+}
+
+// Resource check function
+async function checkResources() {
+    try {
+        const stats = await getContainerStats();
+        console.log(`Memory usage: ${stats.memoryUsagePercent}%`);
+        console.log(`Memory threshold: ${MEMORY_THRESHOLD}%`);
+        console.log('--------------------------------')
+        console.log(`Active processes: ${activeProcesses}`);
+        console.log(`Max parallel processes: ${MAX_PARALLEL_PROCESSES}`);
+        
+        const hasResources = stats.memoryUsagePercent < MEMORY_THRESHOLD && 
+                           activeProcesses < MAX_PARALLEL_PROCESSES;
+
+        return {
+            hasResources,
+            stats,
+            activeProcesses,
+            maxProcesses: MAX_PARALLEL_PROCESSES
+        };
+    } catch (error) {
+        console.error('Resource check failed:', error);
+        return { hasResources: false, error: error.message };
+    }
+}
 
 /* GET Login/Home page. */
 router.get('/', async(req, res) => {
@@ -138,9 +211,12 @@ router.get('/get-location/:id', async (req, res) => {
 // Route to handle Employee Selection For Photo Capture
 router.get('/employee-photo-capture/:key', async (req, res) => {
   const locationAbbr = req.params.key;
-  const client = await pool.connect();
+  
   try {
-    const result1 = await client.query('SELECT id, location_name FROM location_master WHERE abbr = $1', [locationAbbr]);
+    const client = await pool.connect();
+    console.log(`Fetching location details for ${locationAbbr}`); 
+    const result1 = await client.query(`SELECT id, location_name FROM location_master WHERE abbr = '${locationAbbr}'`);
+    console.log(result1);
     const location = result1.rows[0]; // Get first row
     const locationId = location.id;
     const location_name = [location]; // Keep array format for compatibility
@@ -151,9 +227,9 @@ router.get('/employee-photo-capture/:key', async (req, res) => {
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).send('Error fetching Employees');
-  } finally {
-    client.release();
-  }
+  } //finally {
+  //   client.release();
+  // }
 });
 // Route From photo-capture-list  to capture photo
 router.get('/photo-capture', async (req, res) => {
@@ -253,62 +329,151 @@ router.get('/attendance-capture', async (req, res) => {
   try {
     const result = await client.query('SELECT employee_master.fotourl, employee_master.location_id, location_master.lat, location_master.long FROM employee_master, location_master where employee_master.id = $1 and location_master.id = employee_master.location_id', [empId] );
     const otherData = result.rows;
-    res.render('attendance-capture', {empId, empName, location, locationAbbr, otherData });
-} catch (err) {
-    console.error('Error executing query', err);
-    res.status(500).send('Error fetching Other Data from Employees and Location');
+    res.render('attendance-capture', {
+        empId: empId,
+        empName: empName,
+        location: location,
+        locationAbbr: locationAbbr,
+        otherData: otherData // Ensure otherData is at least an empty array if undefined
+    });
+} catch (error) {
+    console.error('Error:', error);
+    res.status(500).send('Internal Server Error');
 } finally {
     client.release();
 }
 });
 
+// Face comparison route
 router.post('/compare-face', uploadFaceCompute.single('photo'), async (req, res) => {
-  try {
-      if (!req.file) {
-          return res.status(400).json({ match: false, error: 'No photo provided' });
-      }
+    let client;
+    
+    try {
+        // Initial validation
+        if (!req.file) {
+            return res.status(400).json({ 
+                match: false, 
+                error: 'No photo provided' 
+            });
+        }
 
-      const capturedPhotoUrl = req.file.path;
-      const empid = req.body.empid;
-      console.log(`Processing face comparison for employee ID: ${empid}`);
-      console.log(`Captured photo path: ${capturedPhotoUrl}`);
+        // Check resources before proceeding
+        const resources = await checkResources();
+        if (!resources.hasResources) {
+            return res.status(503).json({
+                match: false,
+                error: 'Insufficient resources',
+                details: {
+                    memoryUsage: `${resources.stats.memoryUsagePercent}%`,
+                    memoryUsageMB: resources.stats.memoryUsageMB,
+                    containerLimitMB: resources.stats.containerLimitMB,
+                    activeProcesses: resources.activeProcesses,
+                    maxProcesses: resources.maxProcesses
+                }
+            });
+        }
 
-      // Get the reference image URL from the database
-      const query = 'SELECT fotourl FROM employee_master WHERE id = $1';
-      console.log(`Fetching reference image for employee ${empid} from database`);
-      const result = await pool.query(query, [empid]);
-      
-      if (result.rows.length === 0) {
-          console.log(`No employee found with ID: ${empid}`);
-          return res.status(404).json({ match: false, error: 'Employee not found' });
-      }
+        const capturedPhotoUrl = req.file.path;
+        const empid = req.body.empid;
 
-      let referenceImageUrl = result.rows[0].fotourl;
-       referenceImageUrl = referenceImageUrl.substring(1)
-      console.log(`Reference image URL: ${referenceImageUrl}`);
-      
-      // Use your existing face comparison function
-      const { compareFacesPython } = require('../face-comparison/faceComparisonPython');
-      console.log('Starting face comparison...');
-      const similarityScore = await compareFacesPython(capturedPhotoUrl, referenceImageUrl);
-      console.log(`Face comparison complete. Similarity score: ${similarityScore}`);
-      
-      // Define a threshold for matching
-      const threshold = 0.5; // Adjust this value based on your needs
-      console.log(`Checking if similarity score ${similarityScore} meets threshold ${threshold}`);
-      
-      const isMatch = similarityScore >= threshold;
-      console.log(`Face comparison result: ${isMatch ? 'Match' : 'No match'}`);
-      
-      res.json({ 
-          match: isMatch,
-          score: similarityScore 
-      });
+        // Database operations
+        client = await pool.connect();
+        const result = await client.query(
+            'SELECT fotourl FROM employee_master WHERE id = $1',
+            [empid]
+        );
 
-  } catch (error) {
-      console.error('Error in face comparison:', error);
-      res.status(500).json({ match: false, error: 'Internal server error' });
-  }
+        if (result.rows.length === 0) {
+            return res.status(404).json({ 
+                match: false, 
+                error: 'Employee not found' 
+            });
+        }
+
+        let referenceImageUrl = result.rows[0].fotourl.substring(1);
+
+        // Increment process counter
+        activeProcesses++;
+        console.log(`Starting face comparison process (${activeProcesses} active)`);
+
+        // Face comparison promise
+        const compareFaces = new Promise((resolve, reject) => {
+            const pythonProcess = spawn('python', [
+                'face-comparison/faceComparisonReloaded.py',
+                capturedPhotoUrl,
+                referenceImageUrl
+            ], {
+                stdio: ['pipe', 'pipe', 'pipe'],
+                env: {
+                    ...process.env,
+                    PYTHONUNBUFFERED: '1'
+                }
+            });
+
+            let outputData = '';
+            let errorData = '';
+
+            pythonProcess.stdout.on('data', (data) => {
+                outputData += data.toString();
+            });
+
+            pythonProcess.stderr.on('data', (data) => {
+                errorData += data.toString();
+            });
+
+            // Handle process completion
+            pythonProcess.on('close', (code) => {
+                if (code !== 0) {
+                    reject(new Error(`Python process failed: ${errorData}`));
+                } else {
+                    resolve(parseFloat(outputData.trim()));
+                }
+            });
+
+            // Set timeout
+            const timeout = setTimeout(() => {
+                pythonProcess.kill();
+                reject(new Error('Face comparison timed out'));
+            }, PROCESS_TIMEOUT);
+
+            // Cleanup on process exit
+            pythonProcess.on('exit', () => {
+                clearTimeout(timeout);
+            });
+        });
+
+        try {
+            const similarityScore = await compareFaces;
+            const threshold = 0.5;
+            const isMatch = similarityScore >= threshold;
+
+            res.json({ 
+                match: isMatch,
+                score: similarityScore
+            });
+        } finally {
+            // Always decrement process counter
+            activeProcesses--;
+            console.log(`Face comparison complete (${activeProcesses} active)`);
+            
+            // Cleanup temporary file
+            try {
+                await fs.unlink(capturedPhotoUrl);
+            } catch (err) {
+                console.error('Error deleting temporary file:', err);
+            }
+        }
+
+    } catch (error) {
+        console.error('Face comparison error:', error);
+        res.status(500).json({ 
+            match: false, 
+            error: 'Face comparison failed',
+            details: error.message 
+        });
+    } finally {
+        if (client) client.release();
+    }
 });
 
 // Route to save Attendance Data
