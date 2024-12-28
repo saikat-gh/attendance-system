@@ -362,7 +362,7 @@ router.post('/compare-face', uploadFaceCompute.single('photo'), async (req, res)
         if (!resources.hasResources) {
             return res.status(503).json({
                 match: false,
-                error: 'Insufficient resources',
+                error: 'Server Busy! Capture Photo Again.',
                 details: {
                     memoryUsage: `${resources.stats.memoryUsagePercent}%`,
                     memoryUsageMB: resources.stats.memoryUsageMB,
