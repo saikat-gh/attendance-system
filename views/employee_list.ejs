@@ -158,9 +158,13 @@
                         <td> <%= employee.fname %></td>
                         <td><%= employee.lname %></td>                    
                         <td><img src="<%= employee.fotourl %>" alt="" style="width: 30px; height: 30px; border-radius: 50%;"></td>
-                        <td><a class="editTag" href="/employee-edit?id=<%= employee.id %>">Edit</a>
-                            <button class="btnDelete" onClick="deleteEmployee(<%= employee.id %>)">Delete</button>
+                        <td><a class="editTag" 
+                                <%= glbUserType === 'admin' ? `href=/employee-edit?id=${employee.id}` : '' %> > Edit </a>
+                                <button class="btnDelete" onClick="deleteEmployee(<%= employee.id %>)">Delete</button>
                         </td>
+                        <!-- <td><a class="editTag" href="/employee-edit?id=<%= employee.id %>">Edit</a>
+                            <button class="btnDelete" onClick="deleteEmployee(<%= employee.id %>)">Delete</button>
+                        </td> -->
                     </tr>
                 <% }); %>
             </table>

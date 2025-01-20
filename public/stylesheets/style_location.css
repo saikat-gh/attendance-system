@@ -521,3 +521,9 @@
     justify-content: center;
     gap: 6px;
 }
+
+a.editTag[href=""] {
+    pointer-events: none;
+    color: grey;
+    text-decoration: none;
+}

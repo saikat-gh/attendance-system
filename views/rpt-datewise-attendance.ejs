@@ -175,6 +175,12 @@
 
     <script>
         let locationId;
+        document.addEventListener('DOMContentLoaded', () => {
+            const selectElement = document.getElementById('selectLocation');
+            locationId = selectElement.value; // Capture the default selected value
+            console.log('Default selected value:', locationId);
+        });
+        
         function locationValue(value) {
             locationId = value;
         }   
@@ -192,6 +198,8 @@
                 alert('Please select both start and end dates.');
                 return;
             }
+            console.log(`Generating attendance report for date range: ${startDate} to ${endDate} and location ${locationId}`);
+
             window.location.href = `/generate-report?startDate=${startDate}&endDate=${endDate}&locationId=${locationId}`;
             // fetch(`/generate-report?startDate=${startDate}&endDate=${endDate}`)
             //     .then(response => response.json())
