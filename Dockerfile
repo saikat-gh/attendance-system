@@ -45,5 +45,10 @@ COPY . .
 # Expose the port your app runs on
 EXPOSE 3000
 
+# Memory optimizations for Node.js and Python
+ENV NODE_OPTIONS="--max-old-space-size=512"
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONOPTIMIZE=2
+
 # Start the application
 CMD ["npm", "run", "start:prod"]

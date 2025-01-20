@@ -261,6 +261,34 @@
          z-index: 10; /* Ensure text appears above video */
         }
 
+        /* loader styles */
+        .loader-container {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 1000;
+                justify-content: center;
+                align-items: center;
+         }
+
+.loader {
+    border: 5px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 5px solid #3498db;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
     </style>
 </head>
 <body>
@@ -320,6 +348,10 @@
                 </div>
             </div>
         </form>
+    </div>
+    <!-- Add this loader container -->
+    <div class="loader-container">
+        <div class="loader"></div>
     </div>
     <script>
         
@@ -455,6 +487,8 @@
         return;
     }
 
+    showLoader();
+
     // Draw the current frame from the video onto the canvas
     const context = canvas.getContext('2d');
     canvas.width = video.videoWidth;
@@ -472,9 +506,9 @@
                 method: 'POST',
                 body: formData
             });
-            console.log(`Response from compare-face api : `);
+            console.log(`Response from compare-face api : `,response);
             const result = await response.json();
-            
+            console.log("Result from face-compare: ",result)
             if (result.match) {
                 // If faces match, show success message
                 showSuccess(`Face verification successful! (Similarity: ${(result.score * 100).toFixed(1)}%)`);
@@ -490,13 +524,15 @@
                 guideText.style.display = 'none';
             } else {
                 console.log("show error");
-                showError('Face does not match with the registered image. Please try again.');
+                showError(result.error || 'Face does not match with the registered image. Please try again.');
                 // Clear the canvas
                 context.clearRect(0, 0, canvas.width, canvas.height);
             }
         } catch (error) {
             console.error('Error comparing faces:', error);
             showError('Error comparing faces. Please try again.');
+        } finally {
+            hideLoader();
         }
     }, 'image/jpeg');
 });
@@ -521,6 +557,22 @@ function clearError() {
     midContainer.style.color = 'initial';
     midContainer.style.fontWeight = 'initial';
     midContainer.innerHTML = '&nbsp;';
+}
+
+function showLoader() {
+    document.querySelector('.loader-container').style.display = 'flex';
+    // Disable all buttons
+    document.querySelectorAll('button').forEach(button => {
+        button.disabled = true;
+    });
+}
+
+function hideLoader() {
+    document.querySelector('.loader-container').style.display = 'none';
+    // Enable all buttons
+    document.querySelectorAll('button').forEach(button => {
+        button.disabled = false;
+    });
 }
         // Adding Click Event Listner to Submit Button and Saving The Form Data 
         // To the Server 
