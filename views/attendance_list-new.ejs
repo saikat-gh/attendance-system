@@ -2,8 +2,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-    /* General reset */
-    * {
+        * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
@@ -18,7 +17,6 @@
         overflow: hidden;
         font-family: Arial, sans-serif;
     }
-
     /* Header styles */
     .header {
         flex: 0 0 15%;
@@ -34,15 +32,15 @@
         margin: 5px;
         color: #8b4513;
     }
-
-    #employee_photo_capture_table {
+    
+    #employee_attendance_table {
         width: 100%;
         max-height: 50px;
         border-collapse: collapse;
         border: 1px solid #deb887;
     }
 
-    #employee_photo_capture_table th {
+    #employee_attendance_table th {
         background-color: #d2691e;
         color: white;
         text-align: center;
@@ -51,26 +49,25 @@
         padding: 10px;
     }
 
-    #employee_photo_capture_table td {
+    #employee_attendance_table td {
         text-align: center;
         padding: 10px;
     }
 
-    #employee_photo_capture_table tr:hover td {
+    #employee_attendance_table tr:hover td {
         background-color: #ffe4c4;
         transition: background-color 0.2s ease;
     }
 
-    #employee_photo_capture_table th,
+    #employee_attendance_table th,
     td {
         border: 1px solid #deb887;
         font-size: 0.9rem;
     }
 
-    #employee_photo_capture_table tr {
+    #employee_attendance_table tr {
         scroll-snap-align: start;
     }
-
     /* Footer styles */
     .footer {
         width: 100%;
@@ -102,7 +99,7 @@
         line-height: 1.2;
         font-size: .7rem;
     }
-    .employee-table-wrapper {
+    .employee-attendance-table-wrapper {
         border: 1px solid black;
         height: 80dvh ;
         overflow-y: auto;
@@ -110,45 +107,44 @@
     }
     </style>
 </head>
-<body class = "photo-capture-list-body">
+<body class = "attendance-list-body">
     <div class="header">
-        <h3> Employee Photo Capture </h3>
-        <h4> Select Employee </h4>
-        <h5> <%= location_name[0].location_name %> </h5>
+        <h3> Attendance Entry </h3>
+        <h4> Select Employee </h3>
+        <h5> <%= location_name %> </h4>
     </div>
-    <div class="employee-table-wrapper">
-        <table id="employee_photo_capture_table">
-            <thead>
-                <tr>
-                    <th width="100%">Employee Name</th>
-                </tr>
-            </thead>
-             <% employees.forEach(employee => { %>
-                <tr data-key = <%= employee.id %> >
-                    <td> <%= employee.fname %> <%= employee.lname %> </td>
-                </tr>
-            <% }); %> 
-        </table>
-    </div>
-        
-    <div class="footer">
-        <div class="footer-image">
-            <img src="../images/sstis-logo.jpg" alt="" style="width: 60px;height:30px;">
+        <div class="employee-attendance-table-wrapper">
+            <table id="employee_attendance_table">
+                <thead>
+                    <tr>
+                        <th width="100%">Employee Name</th>
+                    </tr>
+                </thead>
+                <% employees.forEach(employee => { %>
+                    <tr data-key = <%= employee.id %> >
+                        <td> <%= employee.fname %> <%= employee.lname %> </td>
+                    </tr>
+                <% }); %>
+            </table>
+        </div>        
+        <div class="footer">
+            <div class="footer-image">
+                <img src="../images/sstis-logo.jpg" alt="" style="width: 60px;height:30px;">
+            </div>
+            <div class="footer-text">
+                <div class="topline-text">
+                    <span>Developed & Maintained by</span>
+                </div>
+                <div class="bottomline-text">
+                    <span>SSTIS Technologies Private Limited</span>
+                </div>
+            </div>          
         </div>
-        <div class="footer-text">
-            <div class="topline-text">
-                <span>Developed & Maintained by</span>
-            </div>
-            <div class="bottomline-text">
-                <span>SSTIS Technologies Private Limited</span>
-            </div>
-        </div>          
-    </div>
-    
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', () => {
         // Select the table element
-        const table = document.getElementById('employee_photo_capture_table');
+        const table = document.getElementById('employee_attendance_table');
     
         if (table) {
             table.addEventListener('click', function (event) {
@@ -169,16 +165,16 @@
     
                     // Get the location name from the <h4> tag
                     const location = document.querySelector('h4').textContent.trim();
-                    console.log("Location:", location);
-    
+                    const locationAbbr = "<%= locationAbbr %>";
+                                           
                     // Navigate to the next page
-                    window.location.href = `/photo-capture?empId=${empId}&empName=${cellsEncoded}&location=${encodeURIComponent(location)}&locationAbbr=<%= locationAbbr %>`;
+                    window.location.href = `/attendance-capture-new?empId=${empId}&empName=${cellsEncoded}&location=${encodeURIComponent(location)}&locationAbbr=${locationAbbr}`;
                 } else {
                     console.error("Row not found or missing data-key.");
                 }
             });
         } else {
-            console.error("Table with id 'employee_photo_capture_table' not found.");
+            console.error("Table with id 'employee_attendance_table' not found.");
         }
     });
     </script>

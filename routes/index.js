@@ -186,6 +186,11 @@ router.get('/', async(req, res) => {
     client.release();
   }
 });
+// Route to get Current date & time from Server
+router.get('/get-current-time', (req, res) => {
+  const currentTime = new Date().toISOString(); // Server's current time in ISO format
+  res.json({ currentTime });
+});
 
 router.get('/test', async (req, res) => {
   const client = await pool.connect();
@@ -336,6 +341,26 @@ router.get('/attendance/:key', async (req, res) => {
   }
 });
 
+router.get('/attendance-new/:key', async (req, res) => {
+  
+  const locationAbbr = req.params.key;
+  const client = await pool.connect();
+  try {
+    const result1 = await client.query('SELECT id, location_name from location_master where abbr = $1', [locationAbbr]);
+    const location = result1.rows[0]; // Get first row
+    const locationId = location.id;
+    const location_name = location.location_name;
+    const result2 = await client.query('SELECT id, fname, lname, fotourl FROM employee_master where location_id = $1 order by fname, lname', [locationId]);
+    const employees = result2.rows;
+    res.render('attendance_list-new', { employees, locationId, location_name, locationAbbr });
+  } catch (err) {
+    console.error('Error executing query', err);
+    res.status(500).send('Error fetching Employees');
+  } finally {
+    client.release();
+  }
+});
+
 // Route to handle Attendance Entry
 router.get('/attendance-submit/:key', async(req, res) => {
   const locationId = req.params.id;
@@ -383,7 +408,26 @@ router.get('/attendance-capture', async (req, res) => {
 }
 });
 
-// Face comparison route
+router.get('/attendance-capture-new', async (req, res) => {
+  // Extract data from query parameters
+  const empId = req.query.empId; // Employee ID
+  const empName = JSON.parse(decodeURIComponent(req.query.empName)); // Row Data (parsed from JSON)
+  const location = req.query.location; // Location Name
+  const locationAbbr = req.query.locationAbbr; // Location Abbreviation
+  const client = await pool.connect();
+  
+  try {
+    const result = await client.query('SELECT employee_master.fotourl, employee_master.location_id, location_master.lat, location_master.long FROM employee_master, location_master where employee_master.id = $1 and location_master.id = employee_master.location_id', [empId] );
+    const otherData = result.rows;
+    res.render('attendance-capture-new', {empId, empName, location, locationAbbr, otherData });
+} catch (err) {
+    console.error('Error executing query', err);
+    res.status(500).send('Error fetching Other Data from Employees and Location');
+} finally {
+    client.release();
+}
+});
+
 router.post('/compare-face', uploadFaceCompute.single('photo'), async (req, res) => {
     let client;
     
@@ -964,6 +1008,7 @@ router.put('/location-update', async(req, res) => {
         const result = await client.query(sql, [location_name, address1, address2, address3, abbr, lat, long, locationId])
         res.json({ success: true, redirectUrl: `/location` });
     } else {
+      console.log("Duplicate Abbreviation");
       res.status(400).json({ error: 'Duplicate Abbreviation Entered' });
     }
   } catch (error) {
@@ -1076,7 +1121,6 @@ router.get("/rptDatewiseAttendance" , async (req, res) => {
 
 router.get('/generate-report', async (req, res) => {
 
-  
   const { startDate, endDate, locationId } = req.query;
   console.log(`Generating attendance report for date range: ${startDate} to ${endDate}`);
 

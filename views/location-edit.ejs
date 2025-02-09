@@ -121,6 +121,7 @@
             })
             .then(response => {
                 if (!response.ok) {
+                    console.log("response.json");
                     const errorData = response.json();
                     throw new Error(errorData.error || 'Failed to update location details');
                 }

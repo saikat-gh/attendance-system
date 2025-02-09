@@ -32,6 +32,8 @@
         }
     
         function deleteLocation(locationId) {
+            let uType = "<%=glbUserType%>";
+            if (uType==="admin") {
         if (confirm("Are you sure you want to delete this location?")) {
             fetch(`/location-delete?id=${locationId}`, {
                 method: 'DELETE',
@@ -55,7 +57,7 @@
         .catch(error => console.error('Error deleting location:', error));
         }
         }
-
+    }
     </script>
 
   <div class="location_form_container"> 
@@ -80,18 +82,25 @@
                         <th width="15%">Actions</th>
                     </tr>
                 </thead>
-                <% locations.forEach(location => { %>
-                    <tr data-key = <%= location.id %> >
-                        <td> <%= location.location_name %> </td>
-                        <td> <%= location.abbr %> </td>
-                        <div class="allTag">
-                        <td><a class="editTag" href="/location-edit?id=<%= location.id %>">Edit</a>
-                            <button class="btnDelete" onclick="deleteLocation(<%= location.id %>)">Delete</button>
-                        </td>
-                        </div>
-                    </tr>
-                <% }); %>
-
+                <% locations.forEach(location => { 
+                    // Check user type and location condition
+                    if (glbUserType === 'admin' || location.location_name === glbLocaName) { %>
+                        <tr data-key="<%= location.id %>">
+                            <td><%= location.location_name %></td>
+                            <td><%= location.abbr %></td>
+                            <div class="allTag">
+                            <td>
+                                <!-- <% if (glbUserType === 'admin') { %>
+                                    <a class="editTag" href="/location-edit?id=<%= location.id %>">Edit</a>
+                                <% } %> -->
+                                <a class="editTag" 
+                                <%= glbUserType === 'admin' ? `href=/location-edit?id=${location.id}` : '' %> > Edit </a>
+                                <button class="btnDelete" onclick="deleteLocation(<%= location.id %>)">Delete</button>
+                            </td>
+                            </div>
+                        </tr>
+                    <% } 
+                }); %>
             </table>
         </div>
       </form>
