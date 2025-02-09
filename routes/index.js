@@ -187,6 +187,45 @@ router.get('/', async(req, res) => {
   }
 });
 
+router.get('/test', async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const result = await client.query('SELECT * FROM employee_master');
+    const employees = result.rows;
+    
+    // Extract fotourls into array, removing the leading '/' if present
+    const fotourls = employees
+      .map(emp => emp.fotourl)
+      .filter(url => url) // Remove null/undefined values
+      .map(url => url.substring(url.lastIndexOf('/') + 1));
+
+    console.log(fotourls);
+
+    // // Read all files in uploads directory
+    const files = await fs.readdir('uploads');
+    
+    // Delete files not in fotourls array
+    for (const file of files) {
+      const filePath = `uploads/${file}`;
+      if (!fotourls.includes(filePath)) {
+        try {
+          await fs.unlink(filePath);
+          console.log(`Deleted unused file: ${filePath}`);
+        } catch (error) {
+          console.error(`Error deleting file ${filePath}:`, error);
+        }
+      }
+    }
+
+    res.json(employees);
+  } catch (err) {
+    console.error('Error executing query', err);
+    res.status(500).send('Error fetching Employees');
+  } finally {
+    client.release();
+  }
+});
+
 // Route fetch latitude and longitude from Location Master
 router.get('/get-location/:id', async (req, res) => {
   const locationId = req.params.id; // Get the location ID from the request
@@ -511,8 +550,8 @@ router.post('/submit-attendance', upload.single('photo'), async (req, res) => {
       // // const frame = cv.imread('photoUrl'); 
       // // const referenceImage = cv.imread('/uploads/test.jpg')
       // const { compareFacesPython } = require('../face-comparison/faceComparisonPython');
-      // let similarityScore = await compareFacesPython(photoUrl, '/uploads/test.jpg');
-      // console.log(`Similarity score : ${similarityScore}`);
+      // // let similarityScore = await compareFacesPython(photoUrl, '/uploads/test.jpg');
+      // // console.log(`Similarity score : ${similarityScore}`);
 
       // Check the count of attendance records for the same empid and date
       console.log(`fetching Attendance counnt`)
