@@ -206,12 +206,12 @@ router.get('/test', async (req, res) => {
 
     console.log(fotourls);
 
-    // // Read all files in uploads directory
+    // Read all files in uploads directory
     const files = await fs.readdir('uploads');
     
     // Delete files not in fotourls array
     for (const file of files) {
-      const filePath = `uploads/${file}`;
+      const filePath = `/home/ubuntu/uploads/${file}`;
       if (!fotourls.includes(filePath)) {
         try {
           await fs.unlink(filePath);
