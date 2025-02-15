@@ -202,19 +202,21 @@ router.get('/test', async (req, res) => {
     const fotourls = employees
       .map(emp => emp.fotourl)
       .filter(url => url) // Remove null/undefined values
-      .map(url => url.substring(url.lastIndexOf('/') + 1));
+      .map(url => url.trim());
+      // .map(url => url.substring(url.lastIndexOf('/') + 1));
 
-    console.log(fotourls);
+    console.log(fotourls.length);
 
-    // Read all files in uploads directory
-    const files = await fs.readdir('uploads');
-    
+    //Read all files in uploads directory
+    const files = await fs.readdir('../uploads');
+    console.log(files);
     // Delete files not in fotourls array
     for (const file of files) {
-      const filePath = `../../uploads/${file}`;
+      const filePath = `/uploads/${file}`;
+
       if (!fotourls.includes(filePath)) {
         try {
-          await fs.unlink(filePath);
+          await fs.unlink(`..${filePath}`);
           console.log(`Deleted unused file: ${filePath}`);
         } catch (error) {
           console.error(`Error deleting file ${filePath}:`, error);
