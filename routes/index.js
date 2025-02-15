@@ -211,7 +211,7 @@ router.get('/test', async (req, res) => {
     
     // Delete files not in fotourls array
     for (const file of files) {
-      const filePath = `/home/ubuntu/uploads/${file}`;
+      const filePath = `../../uploads/${file}`;
       if (!fotourls.includes(filePath)) {
         try {
           await fs.unlink(filePath);
