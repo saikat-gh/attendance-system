@@ -561,12 +561,14 @@ router.post('/compare-face', uploadFaceCompute.single('photo'), async (req, res)
     }
 });
 
+const formParser = multer();
 // Route to save Attendance Data
-router.post('/submit-attendance', upload.single('photo'), async (req, res) => {
+router.post('/submit-attendance', formParser.single('photo'), async (req, res) => {
   try {
       console.log(`Inside Submit attendance`) 
       const { date, time, empid, latitude, longitude, location_id, location_abbr } = req.body;
-      const photoUrl = req.file ? `/uploads/${req.file.filename}` : null;
+      //const photoUrl = req.file ? `/uploads/${req.file.filename}` : null;
+      const photoUrl = null;
       console.log(`Photo url prepared`)
       // Get the location coordinates from location_master
       const locationQuery = 'SELECT lat, long FROM location_master WHERE id = $1';
